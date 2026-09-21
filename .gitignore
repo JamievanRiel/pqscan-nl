@@ -1,0 +1,10 @@
+/pqscan
+/site/
+/targets.jsonl
+/scan.jsonl
+/sample.jsonl
+/*.jsonl.gz
+/top-1m.csv.zip
+/tranco-id.txt
+/ip2asn-v4.tsv.gz
+/exportOO.xml
