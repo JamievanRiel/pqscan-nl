@@ -1,0 +1,2 @@
+# Domains listed here are never scanned.
+# To opt out, open an issue at https://github.com/JamievanRiel/pqscan-nl/issues
