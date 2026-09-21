@@ -1,8 +1,10 @@
 // Command govlist writes the government sector list from the Organisaties
-// overheid export (https://organisaties.overheid.nl/archive/exportOO.xml).
+// overheid export (https://organisaties.overheid.nl/archive/exportOO.xml),
+// plus the hand-maintained entries in lists/government-extra.csv for
+// national services that the register files as organisation units.
 //
 //	curl -fsSL -o exportOO.xml https://organisaties.overheid.nl/archive/exportOO.xml
-//	go run ./tools/govlist -i exportOO.xml -o lists/sectors/government.csv
+//	go run ./tools/govlist -i exportOO.xml -extra lists/government-extra.csv -o lists/sectors/government.csv
 package main
 
 import (
@@ -23,7 +25,7 @@ import (
 	"github.com/JamievanRiel/pqscan-nl/internal/targets"
 )
 
-const source = "https://organisaties.overheid.nl/archive/exportOO.xml"
+const exportURL = "https://organisaties.overheid.nl/archive/exportOO.xml"
 
 // kinds are the organisation types counted as government.
 var kinds = map[string]bool{
@@ -49,40 +51,88 @@ type organisatie struct {
 	} `xml:"contact>internetadressen>internetadres"`
 }
 
-type entry struct{ domain, name string }
+type entry struct{ domain, name, source string }
 
 func main() {
 	in := flag.String("i", "exportOO.xml", "Organisaties overheid export")
+	extra := flag.String("extra", "lists/government-extra.csv", "hand-maintained entries (domain,name,source) merged into the output")
 	out := flag.String("o", "lists/sectors/government.csv", "output CSV")
 	flag.Parse()
-	if err := run(*in, *out, time.Now().Format(time.DateOnly)); err != nil {
+	if err := run(*in, *extra, *out, time.Now().Format(time.DateOnly)); err != nil {
 		fmt.Fprintln(os.Stderr, "govlist:", err)
 		os.Exit(1)
 	}
 }
 
-func run(in, out, today string) error {
+func run(in, extraPath, out, today string) error {
 	f, err := os.Open(in)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	entries, err := parse(f, today)
+	register, err := parse(f, today)
 	if err != nil {
 		return err
 	}
+	extra, err := readExtra(extraPath)
+	if err != nil {
+		return err
+	}
+	entries := merge(register, extra)
 	var buf bytes.Buffer
 	w := csv.NewWriter(&buf)
 	w.Write([]string{"domain", "name", "source"})
 	for _, e := range entries {
-		w.Write([]string{e.domain, e.name, source})
+		w.Write([]string{e.domain, e.name, e.source})
 	}
 	w.Flush()
 	if err := w.Error(); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stderr, "%d government domains\n", len(entries))
+	fmt.Fprintf(os.Stderr, "%d government domains, %d from %s\n", len(entries), len(entries)-len(register), extraPath)
 	return os.WriteFile(out, buf.Bytes(), 0o644)
+}
+
+// readExtra reads the hand-maintained entries. The file follows the same
+// rules as a sector list: header domain,name,source, a valid domain and a
+// source on every row.
+func readExtra(path string) ([]entry, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	ts, err := targets.ParseSectorCSV(bytes.NewReader(b), path)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := csv.NewReader(bytes.NewReader(b)).ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	out := make([]entry, len(ts))
+	for i, t := range ts {
+		row := rows[i+1] // rows[0] is the header
+		out[i] = entry{domain: t.Domain, name: strings.TrimSpace(row[1]), source: strings.TrimSpace(row[2])}
+	}
+	return out, nil
+}
+
+// merge adds the extra entries for domains the register does not have and
+// sorts the result by domain. On a shared domain the register entry wins.
+func merge(register, extra []entry) []entry {
+	out := slices.Clone(register)
+	seen := map[string]bool{}
+	for _, e := range register {
+		seen[e.domain] = true
+	}
+	for _, e := range extra {
+		if !seen[e.domain] {
+			seen[e.domain] = true
+			out = append(out, e)
+		}
+	}
+	slices.SortFunc(out, func(a, b entry) int { return strings.Compare(a.domain, b.domain) })
+	return out
 }
 
 // parse returns one entry per domain of an active government organisation,
@@ -123,7 +173,7 @@ func parse(r io.Reader, today string) ([]entry, error) {
 	}
 	var out []entry
 	for _, d := range slices.Sorted(maps.Keys(names)) {
-		out = append(out, entry{domain: d, name: names[d]})
+		out = append(out, entry{domain: d, name: names[d], source: exportURL})
 	}
 	return out, nil
 }

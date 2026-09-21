@@ -67,27 +67,54 @@ func TestParse(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := []entry{
-		{domain: "diemen.nl", name: "Gemeente Diemen"},
-		{domain: "fuseertlater.nl", name: "Gemeente Fuseert Later"},
-		{domain: "rijksoverheid.nl", name: "Ministerie van Algemene Zaken"},
+		{domain: "diemen.nl", name: "Gemeente Diemen", source: exportURL},
+		{domain: "fuseertlater.nl", name: "Gemeente Fuseert Later", source: exportURL},
+		{domain: "rijksoverheid.nl", name: "Ministerie van Algemene Zaken", source: exportURL},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %+v, want %+v", got, want)
 	}
 }
 
-func TestRunWritesCSV(t *testing.T) {
+const extraFixture = `domain,name,source
+www.belastingdienst.nl,Belastingdienst,https://organisaties.overheid.nl/68888/Directoraat-generaal_Belastingdienst
+diemen.nl,Diemen from the extras,https://example.org/diemen
+`
+
+func TestRunMergesExtra(t *testing.T) {
+	dir := t.TempDir()
+	in := filepath.Join(dir, "exportOO.xml")
+	extra := filepath.Join(dir, "government-extra.csv")
+	out := filepath.Join(dir, "government.csv")
+	os.WriteFile(in, []byte(fixture), 0o644)
+	os.WriteFile(extra, []byte(extraFixture), 0o644)
+	if err := run(in, extra, out, "2026-09-21"); err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(out)
+	// Extra entries are added and sorted in; on a shared domain the register wins.
+	want := `domain,name,source
+belastingdienst.nl,Belastingdienst,https://organisaties.overheid.nl/68888/Directoraat-generaal_Belastingdienst
+diemen.nl,Gemeente Diemen,https://organisaties.overheid.nl/archive/exportOO.xml
+fuseertlater.nl,Gemeente Fuseert Later,https://organisaties.overheid.nl/archive/exportOO.xml
+rijksoverheid.nl,Ministerie van Algemene Zaken,https://organisaties.overheid.nl/archive/exportOO.xml
+`
+	if string(b) != want {
+		t.Fatalf("got CSV:\n%s\nwant:\n%s", b, want)
+	}
+}
+
+func TestRunNeedsValidExtra(t *testing.T) {
 	dir := t.TempDir()
 	in := filepath.Join(dir, "exportOO.xml")
 	out := filepath.Join(dir, "government.csv")
 	os.WriteFile(in, []byte(fixture), 0o644)
-	if err := run(in, out, "2026-09-21"); err != nil {
-		t.Fatal(err)
+	if err := run(in, filepath.Join(dir, "missing.csv"), out, "2026-09-21"); err == nil {
+		t.Error("expected an error for a missing extras file")
 	}
-	b, _ := os.ReadFile(out)
-	lines := strings.Split(strings.TrimSpace(string(b)), "\n")
-	if lines[0] != "domain,name,source" || len(lines) != 4 ||
-		lines[1] != "diemen.nl,Gemeente Diemen,https://organisaties.overheid.nl/archive/exportOO.xml" {
-		t.Fatalf("unexpected CSV:\n%s", b)
+	bad := filepath.Join(dir, "bad.csv")
+	os.WriteFile(bad, []byte("domain,name,source\nbelastingdienst.nl,Belastingdienst,\n"), 0o644)
+	if err := run(in, bad, out, "2026-09-21"); err == nil || !strings.Contains(err.Error(), "no source") {
+		t.Errorf("err = %v, want an error about the missing source", err)
 	}
 }
