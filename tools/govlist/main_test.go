@@ -53,6 +53,11 @@ const fixture = `<?xml version="1.0" encoding="UTF-8"?>
     <p:types><p:type>Overheidsstichting of -vereniging</p:type></p:types>
     <p:contact><p:internetadressen><p:internetadres><p:url>https://iets.nl</p:url><p:label>algemeen</p:label></p:internetadres></p:internetadressen></p:contact>
   </p:organisatie>
+  <p:organisatie>
+    <p:naam>Agentschap Alleen Register</p:naam>
+    <p:types><p:type>Agentschap</p:type></p:types>
+    <p:contact><p:internetadressen><p:internetadres><p:url>https://organisaties.overheid.nl/woo/28248840/example</p:url><p:label>WOO-informatie (aXYZ)</p:label></p:internetadres></p:internetadressen></p:contact>
+  </p:organisatie>
 </p:organisaties>
 </p:overheidsorganisaties>`
 

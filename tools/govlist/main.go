@@ -129,7 +129,8 @@ func parse(r io.Reader, today string) ([]entry, error) {
 }
 
 // domain returns the organisation's main website domain, or "" when it has
-// ended, is not a government type or has no website.
+// ended, is not a government type or has no website. Addresses hosted on
+// organisaties.overheid.nl (the register itself) are always ignored.
 func (o organisatie) domain(today string) string {
 	if o.EindDatum != "" && o.EindDatum <= today {
 		return ""
@@ -138,16 +139,42 @@ func (o organisatie) domain(today string) string {
 		return ""
 	}
 	raw := ""
+	// Look for an address with label "algemeen", skipping register self-links
 	for _, a := range o.Adressen {
 		if strings.EqualFold(strings.TrimSpace(a.Label), "algemeen") {
-			raw = a.URL
-			break
+			if !isRegisterLink(a.URL) {
+				raw = a.URL
+				break
+			}
 		}
 	}
-	if raw == "" && len(o.Adressen) > 0 {
-		raw = o.Adressen[0].URL
+	// Fall back to first non-register address if no "algemeen" found
+	if raw == "" {
+		for _, a := range o.Adressen {
+			if !isRegisterLink(a.URL) {
+				raw = a.URL
+				break
+			}
+		}
 	}
 	return hostOf(raw)
+}
+
+// isRegisterLink reports whether the URL is hosted on organisaties.overheid.nl.
+func isRegisterLink(rawURL string) bool {
+	rawURL = strings.TrimSpace(rawURL)
+	if rawURL == "" {
+		return false
+	}
+	if !strings.Contains(rawURL, "://") {
+		rawURL = "https://" + rawURL
+	}
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return false
+	}
+	host := u.Hostname()
+	return strings.EqualFold(host, "organisaties.overheid.nl")
 }
 
 func hostOf(raw string) string {
