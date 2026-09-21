@@ -1,0 +1,12 @@
+{{define "content"}}
+<h1>Look up a domain</h1>
+<p class="lead">See what a Dutch website negotiated in the scan of {{.Latest.Date}}.</p>
+<form id="search" class="search" role="search">
+  <label for="q">Domain</label>
+  <input id="q" name="q" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="example.nl">
+  <button type="submit">Look up</button>
+</form>
+<div id="result" aria-live="polite"></div>
+<noscript><p>Search needs JavaScript. All results are in the <a href="https://github.com/JamievanRiel/pqscan-nl/releases">raw data on GitHub</a>.</p></noscript>
+<script src="search.js"></script>
+{{end}}

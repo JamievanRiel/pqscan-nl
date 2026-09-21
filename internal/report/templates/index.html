@@ -1,0 +1,47 @@
+{{define "content"}}
+<section class="hero">
+  <p class="eyebrow">Weekly scan · {{.Latest.Date}}</p>
+  <h1><span class="big">{{pct .Headline}}%</span> of the top .nl websites protect visitors with post-quantum key exchange</h1>
+  <p class="lead">Of the {{num .Latest.Tranco.Reachable}} reachable .nl domains in the <a href="https://tranco-list.eu/">Tranco top 1 million</a>, {{num .Latest.Tranco.PQDefault}} use a hybrid post-quantum key exchange with a current browser. Another {{num .Latest.Tranco.PQSupported}} support it but do not choose it by default.</p>
+</section>
+
+<section>
+  <h2>Trend</h2>
+  <p class="note">Share of reachable top .nl domains that use post-quantum key exchange by default, per weekly scan.</p>
+  {{.Trend}}
+</section>
+
+<section>
+  <h2>By sector</h2>
+  <ul class="legend">
+    <li><span class="swatch seg-pq"></span>Post-quantum by default</li>
+    <li><span class="swatch seg-sup"></span>Supported, not default</li>
+    <li><span class="swatch seg-classic"></span>Classic only</li>
+  </ul>
+  {{.Sectors}}
+  <p class="note">Shares are of reachable domains; the number on the right is post-quantum by default. Sector lists are curated, see the <a href="methodology.html#sectors">methodology</a>.</p>
+</section>
+
+<section>
+  <h2>By hosting network</h2>
+  <p class="note">The networks that host the most reachable top .nl domains.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Network</th><th class="num">AS</th><th class="num">Domains</th><th class="num">Post-quantum</th></tr></thead>
+      <tbody>
+      {{- range .Providers}}
+        <tr><td>{{.Org}}</td><td class="num">{{.ASN}}</td><td class="num">{{num .Reachable}}</td><td class="num">{{pct .PQPct}}%</td></tr>
+      {{- end}}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Not reachable</h2>
+  <p>{{num .Latest.Tranco.Unreachable}} top .nl domains did not complete a TLS handshake on port 443, on the domain or its www host. They are left out of every percentage.</p>
+  {{- with .Causes}}
+  <p class="note">By cause, across all scanned domains: {{.}}.</p>
+  {{- end}}
+</section>
+{{end}}

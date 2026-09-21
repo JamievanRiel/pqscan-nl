@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How quantum-safe is .nl?</title>
+<meta name="description" content="A weekly measurement of post-quantum TLS key exchange on Dutch websites.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">How quantum-safe is .nl?</a>
+  <nav>
+    <a href="index.html" aria-current="page">Results</a>
+    <a href="search.html">Search</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="findings.html">Findings</a>
+  </nav>
+</header>
+<main>
+
+<section class="hero">
+  <p class="eyebrow">Weekly scan · 2026-09-28</p>
+  <h1><span class="big">40.0%</span> of the top .nl websites protect visitors with post-quantum key exchange</h1>
+  <p class="lead">Of the 5 reachable .nl domains in the <a href="https://tranco-list.eu/">Tranco top 1 million</a>, 2 use a hybrid post-quantum key exchange with a current browser. Another 1 support it but do not choose it by default.</p>
+</section>
+
+<section>
+  <h2>Trend</h2>
+  <p class="note">Share of reachable top .nl domains that use post-quantum key exchange by default, per weekly scan.</p>
+  <svg class="chart" viewBox="0 0 640 220" role="img" aria-label="Share of top .nl sites using post-quantum key exchange by default, per scan"><line class="grid" x1="44" x2="624" y1="192.0" y2="192.0"/><text class="tick" x="38" y="192.0" text-anchor="end" dominant-baseline="middle">0%</text><line class="grid" x1="44" x2="624" y1="147.0" y2="147.0"/><text class="tick" x="38" y="147.0" text-anchor="end" dominant-baseline="middle">25%</text><line class="grid" x1="44" x2="624" y1="102.0" y2="102.0"/><text class="tick" x="38" y="102.0" text-anchor="end" dominant-baseline="middle">50%</text><line class="grid" x1="44" x2="624" y1="57.0" y2="57.0"/><text class="tick" x="38" y="57.0" text-anchor="end" dominant-baseline="middle">75%</text><line class="grid" x1="44" x2="624" y1="12.0" y2="12.0"/><text class="tick" x="38" y="12.0" text-anchor="end" dominant-baseline="middle">100%</text><polyline class="line" points="44.0,156.0 624.0,120.0"/><circle class="dot" cx="44.0" cy="156.0" r="4"><title>2026-09-21: 20.0%</title></circle><circle class="dot" cx="624.0" cy="120.0" r="4"><title>2026-09-28: 40.0%</title></circle><text class="tick" x="44.0" y="212" text-anchor="start">2026-09-21</text><text class="tick" x="624.0" y="212" text-anchor="end">2026-09-28</text></svg>
+</section>
+
+<section>
+  <h2>By sector</h2>
+  <ul class="legend">
+    <li><span class="swatch seg-pq"></span>Post-quantum by default</li>
+    <li><span class="swatch seg-sup"></span>Supported, not default</li>
+    <li><span class="swatch seg-classic"></span>Classic only</li>
+  </ul>
+  <svg class="chart" viewBox="0 0 640 102" role="img" aria-label="Post-quantum key exchange per group of sites"><text class="label" x="0" y="17.0" dominant-baseline="middle">Top .nl sites</text><rect class="seg-pq" x="170.0" y="7.0" width="165.6" height="20"><title>Top .nl sites, post-quantum by default: 2 of 5 (40.0%)</title></rect><rect class="seg-sup" x="335.6" y="7.0" width="82.8" height="20"><title>Top .nl sites, supported, not default: 1 of 5 (20.0%)</title></rect><rect class="seg-classic" x="418.4" y="7.0" width="165.6" height="20"><title>Top .nl sites, classic only: 2 of 5 (40.0%)</title></rect><text class="value" x="640" y="17.0" text-anchor="end" dominant-baseline="middle">40%</text><text class="label" x="0" y="51.0" dominant-baseline="middle">Banks</text><rect class="seg-pq" x="170.0" y="41.0" width="207.0" height="20"><title>Banks, post-quantum by default: 1 of 2 (50.0%)</title></rect><rect class="seg-classic" x="377.0" y="41.0" width="207.0" height="20"><title>Banks, classic only: 1 of 2 (50.0%)</title></rect><text class="value" x="640" y="51.0" text-anchor="end" dominant-baseline="middle">50%</text><text class="label" x="0" y="85.0" dominant-baseline="middle">Government</text><text class="value" x="640" y="85.0" text-anchor="end" dominant-baseline="middle">0%</text></svg>
+  <p class="note">Shares are of reachable domains; the number on the right is post-quantum by default. Sector lists are curated, see the <a href="methodology.html#sectors">methodology</a>.</p>
+</section>
+
+<section>
+  <h2>By hosting network</h2>
+  <p class="note">The networks that host the most reachable top .nl domains.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Network</th><th class="num">AS</th><th class="num">Domains</th><th class="num">Post-quantum</th></tr></thead>
+      <tbody>
+        <tr><td>KPN</td><td class="num">1136</td><td class="num">2</td><td class="num">0.0%</td></tr>
+        <tr><td>CLOUDFLARENET</td><td class="num">13335</td><td class="num">2</td><td class="num">100.0%</td></tr>
+        <tr><td>AMAZON-02</td><td class="num">16509</td><td class="num">1</td><td class="num">0.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Not reachable</h2>
+  <p>1 top .nl domains did not complete a TLS handshake on port 443, on the domain or its www host. They are left out of every percentage.</p>
+  <p class="note">By cause, across all scanned domains: DNS failure 1, timeout 1.</p>
+</section>
+
+</main>
+<footer class="site-footer">
+  <p>Scan of 2026-09-28 · Tranco list 64X5X · <a href="https://github.com/JamievanRiel/pqscan-nl">Source code and raw data</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<meta name="description" content="A weekly measurement of post-quantum TLS key exchange on Dutch websites.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">How quantum-safe is .nl?</a>
+  <nav>
+    <a href="index.html"{{if eq .Page "index"}} aria-current="page"{{end}}>Results</a>
+    <a href="search.html"{{if eq .Page "search"}} aria-current="page"{{end}}>Search</a>
+    <a href="methodology.html"{{if eq .Page "methodology"}} aria-current="page"{{end}}>Methodology</a>
+    <a href="findings.html"{{if eq .Page "findings"}} aria-current="page"{{end}}>Findings</a>
+  </nav>
+</header>
+<main>
+{{template "content" .}}
+</main>
+<footer class="site-footer">
+  <p>Scan of {{.Latest.Date}} · Tranco list {{.Latest.TrancoListID}} · <a href="https://github.com/JamievanRiel/pqscan-nl">Source code and raw data</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,77 @@
+:root {
+  --bg: #fbfbfa;
+  --fg: #1d1d1b;
+  --muted: #5d5d58;
+  --line: #e3e2de;
+  --card: #ffffff;
+  --accent: #1f6f5c;
+  --c-pq: #1f7a63;
+  --c-sup: #8cc4b3;
+  --c-classic: #d9d6cf;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #151614;
+    --fg: #ecebe6;
+    --muted: #a4a39c;
+    --line: #2d2e2b;
+    --card: #1c1d1b;
+    --accent: #6cc3a8;
+    --c-pq: #4fb394;
+    --c-sup: #2f6b5b;
+    --c-classic: #3c3d39;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent); }
+code { font-size: .92em; }
+.site-header, main, .site-footer { max-width: 760px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+.site-header { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; justify-content: space-between; padding-top: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.brand { font-weight: 650; color: var(--fg); text-decoration: none; }
+nav { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+nav a { color: var(--muted); text-decoration: none; }
+nav a[aria-current="page"], nav a:hover { color: var(--fg); }
+main { padding-top: 32px; padding-bottom: 48px; }
+section { margin: 0 0 48px; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 16px; letter-spacing: -0.01em; }
+h2 { font-size: 1.15rem; margin: 32px 0 8px; }
+section > h2:first-child { margin-top: 0; }
+.big { display: block; font-size: 4rem; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+.eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: var(--muted); margin: 0 0 8px; }
+.lead { font-size: 1.1rem; color: var(--muted); }
+.note { color: var(--muted); font-size: .9rem; }
+.chart { width: 100%; height: auto; display: block; margin: 12px 0; }
+.chart .grid { stroke: var(--line); }
+.chart .tick { fill: var(--muted); font-size: 12px; }
+.chart .label { fill: var(--fg); font-size: 13px; }
+.chart .value { fill: var(--fg); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.chart .dot { fill: var(--accent); stroke: var(--bg); stroke-width: 2; }
+.chart rect { stroke: var(--bg); stroke-width: 1; }
+.seg-pq { fill: var(--c-pq); background: var(--c-pq); }
+.seg-sup { fill: var(--c-sup); background: var(--c-sup); }
+.seg-classic { fill: var(--c-classic); background: var(--c-classic); }
+.legend { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: .9rem; color: var(--muted); }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: .85rem; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.search { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 24px 0; }
+.search label { width: 100%; font-size: .9rem; color: var(--muted); }
+.search input { flex: 1 1 220px; min-width: 0; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--fg); }
+.search button { font: inherit; padding: 10px 16px; border: 0; border-radius: 6px; background: var(--accent); color: var(--bg); cursor: pointer; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px; }
+.card h2 { margin-top: 0; overflow-wrap: anywhere; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 600; font-size: .9rem; margin: 0; }
+.status-pq-default { background: var(--c-pq); color: var(--bg); }
+.status-pq-supported { background: var(--c-sup); color: var(--fg); }
+.status-classic, .status-unreachable { background: var(--c-classic); color: var(--fg); }
+.site-footer { border-top: 1px solid var(--line); padding-top: 16px; padding-bottom: 32px; color: var(--muted); font-size: .85rem; }
+@media (max-width: 520px) {
+  h1 { font-size: 1.5rem; }
+  .big { font-size: 3rem; }
+}

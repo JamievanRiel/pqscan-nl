@@ -1,0 +1,51 @@
+{{define "content"}}
+<h1>Methodology</h1>
+<p class="lead">Every Monday a scanner performs TLS handshakes with Dutch websites and records which key exchange each server chooses. It does not request any web pages.</p>
+
+<h2>What is measured</h2>
+<p>For each domain the scanner connects to port 443 of the domain itself. If that does not complete a TLS handshake, it tries the <code>www.</code> host instead. It then runs up to two handshakes:</p>
+<ol>
+  <li><strong>Default handshake.</strong> The scanner offers the same kinds of key exchange as a current browser: the hybrid post-quantum groups X25519MLKEM768, SecP256r1MLKEM768 and SecP384r1MLKEM1024, and classic groups such as X25519. It records the group the server picks.</li>
+  <li><strong>Support check.</strong> Only when the server picked a classic group: a second handshake that offers post-quantum groups only. If it succeeds, the server supports post-quantum key exchange but does not prefer it.</li>
+</ol>
+
+<h2>Statuses</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td>Post-quantum by default</td><td>The default handshake used a hybrid post-quantum group. Traffic recorded today cannot be decrypted later with a quantum computer by breaking the key exchange.</td></tr>
+    <tr><td>Supported, not default</td><td>The server chose a classic group in the default handshake but completed the post-quantum-only handshake.</td></tr>
+    <tr><td>Classic only</td><td>The server used a classic group and refused the post-quantum-only handshake.</td></tr>
+    <tr><td>Not reachable</td><td>No TLS handshake completed on either host. These domains are left out of every percentage.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="sectors">Which domains</h2>
+<p>The main figure covers every <code>.nl</code> domain in the <a href="https://tranco-list.eu/">Tranco top 1 million</a>, a ranking of popular domains built for research. Each scan records the Tranco list ID, so its input can be reproduced.</p>
+<p>The sector comparison uses curated lists, with a source for every entry:</p>
+<ul>
+  <li><strong>Government:</strong> ministries, provinces, municipalities, water boards, agencies, independent administrative bodies, inspectorates, High Councils of State, the judiciary and the police, taken from the <a href="https://organisaties.overheid.nl/">Organisaties overheid</a> register.</li>
+  <li><strong>Banks, hospitals and web shops:</strong> compiled from public lists. The sources are in the CSV files in the repository.</li>
+</ul>
+<p>A domain can be in the Tranco list and in a sector list at the same time.</p>
+
+<h2>Hosting networks</h2>
+<p>Each server's IP address is mapped to its network (autonomous system) with the public-domain <a href="https://iptoasn.com/">iptoasn.com</a> table.</p>
+
+<h2>Limitations</h2>
+<ul>
+  <li>Only port 443 of the domain and its <code>www.</code> host is checked. Redirects to other hosts are not followed, and mail servers are not measured.</li>
+  <li>Scans run from a GitHub Actions server in the United States. Sites behind a content delivery network may answer differently elsewhere.</li>
+  <li>The scanner is written in Go. Its handshake resembles a browser's but is not identical, so a few servers may choose differently for a real browser.</li>
+  <li>Only key exchange is measured, not certificates or signatures.</li>
+  <li>Certificate validity is recorded in the raw data but does not change a domain's status.</li>
+</ul>
+
+<h2>Opting out</h2>
+<p>To exclude a domain from future scans, open an issue on <a href="https://github.com/JamievanRiel/pqscan-nl/issues">GitHub</a>. The domain will be added to the exclusion list.</p>
+
+<h2>Data</h2>
+<p>The raw results of every scan are attached to a <a href="https://github.com/JamievanRiel/pqscan-nl/releases">GitHub release</a>, one JSON record per domain. Per-scan summaries are in <code>data/summaries</code> in the repository.</p>
+{{end}}
