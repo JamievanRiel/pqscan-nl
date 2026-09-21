@@ -46,6 +46,9 @@ func TestProbe(t *testing.T) {
 		"refused.nl":     closedAddr(t),
 		"www.refused.nl": closedAddr(t),
 		"nottls.nl":      serveGarbage(t),
+		// Browsers offer X25519MLKEM768 as their only hybrid, so a server
+		// with only a NIST-curve hybrid is not post-quantum by default.
+		"nist-pq.nl": serveTLS(t, &tls.Config{Certificates: cert("nist-pq.nl"), CurvePreferences: []tls.CurveID{tls.SecP256r1MLKEM768, tls.X25519}}),
 	}
 	now := time.Now().UTC()
 	p := &Prober{Dial: dialMap(servers), Timeout: 2 * time.Second, Roots: pki.roots, Now: func() time.Time { return now }}
@@ -58,6 +61,7 @@ func TestProbe(t *testing.T) {
 		{"classic.nl", "classic", "classic.nl", "X25519", "", "1.3", "", true},
 		{"prefers-classic.nl", "pq-supported", "prefers-classic.nl", "X25519", "X25519MLKEM768", "1.3", "", true},
 		{"old.nl", "classic", "old.nl", "X25519", "", "1.2", "", true},
+		{"nist-pq.nl", "pq-supported", "nist-pq.nl", "X25519", "SecP256r1MLKEM768", "1.3", "", true},
 		{"expired.nl", "pq-default", "expired.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", false},
 		{"untrusted.nl", "pq-default", "untrusted.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", false},
 		{"wwwonly.nl", "pq-default", "www.wwwonly.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", true},

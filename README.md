@@ -8,7 +8,7 @@
 
 **Results: https://jamievanriel.github.io/pqscan-nl/**
 
-Traffic recorded today can be decrypted later if the key exchange that protected it is ever broken by a quantum computer. Hybrid post-quantum key exchanges such as X25519MLKEM768 close that gap, and current browsers already offer them. The question is which websites accept.
+Traffic recorded today can be decrypted later if the key exchange that protected it is ever broken by a quantum computer. Hybrid post-quantum key exchanges close that gap, and current browsers already offer one: X25519MLKEM768. The question is which websites accept it.
 
 Every Monday, `pqscan` performs TLS handshakes with all `.nl` domains in the [Tranco top 1 million](https://tranco-list.eu/) (about 19,000) and with curated lists of Dutch banks, government bodies, hospitals and web shops. It publishes the results as a static site, a summary per scan and the raw data.
 
@@ -16,8 +16,8 @@ Every Monday, `pqscan` performs TLS handshakes with all `.nl` domains in the [Tr
 
 For each domain, `pqscan` connects to port 443 (the domain, or its `www.` host if that fails) and runs up to two handshakes:
 
-1. A **default handshake** offering what a current browser offers: the hybrid groups X25519MLKEM768, SecP256r1MLKEM768 and SecP384r1MLKEM1024 plus classic groups.
-2. Only if the server picked a classic group, a **support check** offering post-quantum groups only.
+1. A **default handshake** offering what current browsers offer: the hybrid group X25519MLKEM768 plus the classic groups X25519, P-256 and P-384, over TLS 1.2 or 1.3.
+2. Only if the server picked a classic group, a **support check** over TLS 1.3 offering all three hybrid groups (X25519MLKEM768, SecP256r1MLKEM768 and SecP384r1MLKEM1024) and nothing classic.
 
 | Status | Meaning |
 |---|---|

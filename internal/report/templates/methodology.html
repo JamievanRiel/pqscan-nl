@@ -5,8 +5,8 @@
 <h2>What is measured</h2>
 <p>For each domain the scanner connects to port 443 of the domain itself. If that does not complete a TLS handshake, it tries the <code>www.</code> host instead. It then runs up to two handshakes:</p>
 <ol>
-  <li><strong>Default handshake.</strong> The scanner offers the same kinds of key exchange as a current browser: the hybrid post-quantum groups X25519MLKEM768, SecP256r1MLKEM768 and SecP384r1MLKEM1024, and classic groups such as X25519. It records the group the server picks.</li>
-  <li><strong>Support check.</strong> Only when the server picked a classic group: a second handshake that offers post-quantum groups only. If it succeeds, the server supports post-quantum key exchange but does not prefer it.</li>
+  <li><strong>Default handshake.</strong> The scanner offers what current browsers offer: the hybrid post-quantum group X25519MLKEM768 and the classic groups X25519, P-256 and P-384, over TLS 1.2 or 1.3. It records the group the server picks.</li>
+  <li><strong>Support check.</strong> Only when the server picked a classic group: a second handshake over TLS 1.3 that offers only the three hybrid post-quantum groups X25519MLKEM768, SecP256r1MLKEM768 and SecP384r1MLKEM1024. If it succeeds, the server supports post-quantum key exchange, but a current browser does not get it.</li>
 </ol>
 
 <h2>Statuses</h2>
@@ -39,6 +39,7 @@
   <li>Only port 443 of the domain and its <code>www.</code> host is checked. Redirects to other hosts are not followed, and mail servers are not measured.</li>
   <li>Scans run from a GitHub Actions server in the United States. Sites behind a content delivery network may answer differently elsewhere.</li>
   <li>The scanner is written in Go. Its handshake resembles a browser's but is not identical, so a few servers may choose differently for a real browser.</li>
+  <li>Servers that only speak TLS 1.1 or older, or only legacy cipher suites or signatures that Go refuses, and servers that stall on the large post-quantum ClientHello, show up as not reachable rather than classic only. Because unreachable domains are left out of the percentages, this slightly raises the headline figure.</li>
   <li>Only key exchange is measured, not certificates or signatures.</li>
   <li>Certificate validity is recorded in the raw data but does not change a domain's status.</li>
 </ul>

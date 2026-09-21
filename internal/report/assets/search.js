@@ -5,7 +5,7 @@
   const out = document.getElementById("result");
   const labels = {
     "pq-default": ["Post-quantum by default", "Visitors with a current browser get a hybrid post-quantum key exchange."],
-    "pq-supported": ["Supported, not default", "The server can do post-quantum key exchange but picks a classic one when a browser offers both."],
+    "pq-supported": ["Supported, not default", "The server supports post-quantum key exchange, but a current browser gets a classic one."],
     "classic": ["Classic only", "The server only negotiated classic key exchange."],
     "unreachable": ["Not reachable", "No TLS handshake completed on port 443."],
   };

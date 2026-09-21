@@ -21,6 +21,25 @@ var PQGroups = []tls.CurveID{tls.X25519MLKEM768, tls.SecP256r1MLKEM768, tls.SecP
 // IsPQ reports whether id is a hybrid post-quantum key exchange.
 func IsPQ(id tls.CurveID) bool { return slices.Contains(PQGroups, id) }
 
+// hello is what a handshake offers: key exchange groups and the lowest TLS
+// version it accepts.
+type hello struct {
+	groups     []tls.CurveID
+	minVersion uint16
+}
+
+var (
+	// browserHello offers what current browsers offer: X25519MLKEM768 as the
+	// only hybrid, the common classic groups, and TLS 1.2 or later.
+	browserHello = hello{
+		groups:     []tls.CurveID{tls.X25519MLKEM768, tls.X25519, tls.CurveP256, tls.CurveP384},
+		minVersion: tls.VersionTLS12,
+	}
+	// pqHello offers every hybrid Go supports and nothing classic. The
+	// hybrids exist only in TLS 1.3.
+	pqHello = hello{groups: PQGroups, minVersion: tls.VersionTLS13}
+)
+
 // DialFunc opens a TCP connection, like net.Dialer.DialContext.
 type DialFunc func(ctx context.Context, network, addr string) (net.Conn, error)
 
@@ -74,10 +93,8 @@ func (p *Prober) now() time.Time {
 	return time.Now()
 }
 
-// handshake connects to host and completes one TLS handshake. With curves
-// nil it offers Go's defaults, which resemble a current browser; otherwise it
-// offers only those groups over TLS 1.3.
-func (p *Prober) handshake(ctx context.Context, host string, curves []tls.CurveID) (conn, error) {
+// handshake connects to host and completes one TLS handshake offering h.
+func (p *Prober) handshake(ctx context.Context, host string, h hello) (conn, error) {
 	timeout := p.Timeout
 	if timeout == 0 {
 		timeout = 10 * time.Second
@@ -102,10 +119,8 @@ func (p *Prober) handshake(ctx context.Context, host string, curves []tls.CurveI
 	cfg := &tls.Config{
 		ServerName:         host,
 		InsecureSkipVerify: true, // validity is recorded separately, see certInfo
-		CurvePreferences:   curves,
-	}
-	if curves != nil {
-		cfg.MinVersion = tls.VersionTLS13
+		CurvePreferences:   h.groups,
+		MinVersion:         h.minVersion,
 	}
 	tc := tls.Client(raw, cfg)
 	if err := tc.HandshakeContext(ctx); err != nil {
@@ -119,10 +134,10 @@ func (p *Prober) handshake(ctx context.Context, host string, curves []tls.CurveI
 }
 
 // handshakeRetry retries once after a timeout.
-func (p *Prober) handshakeRetry(ctx context.Context, host string, curves []tls.CurveID) (conn, error) {
-	c, err := p.handshake(ctx, host, curves)
+func (p *Prober) handshakeRetry(ctx context.Context, host string, h hello) (conn, error) {
+	c, err := p.handshake(ctx, host, h)
 	if err != nil && ClassifyError(err) == "timeout" && ctx.Err() == nil {
-		c, err = p.handshake(ctx, host, curves)
+		c, err = p.handshake(ctx, host, h)
 	}
 	return c, err
 }
@@ -158,7 +173,7 @@ func (p *Prober) Probe(ctx context.Context, t results.Target) results.Record {
 	)
 	for _, h := range []string{t.Domain, "www." + t.Domain} {
 		var err error
-		if c, err = p.handshakeRetry(ctx, h, nil); err == nil {
+		if c, err = p.handshakeRetry(ctx, h, browserHello); err == nil {
 			host = h
 			break
 		}
@@ -185,7 +200,7 @@ func (p *Prober) Probe(ctx context.Context, t results.Target) results.Record {
 		rec.PQGroup = rec.Group
 		return rec
 	}
-	if pq, err := p.handshakeRetry(ctx, host, PQGroups); err == nil && IsPQ(pq.state.CurveID) {
+	if pq, err := p.handshakeRetry(ctx, host, pqHello); err == nil && IsPQ(pq.state.CurveID) {
 		rec.Status = results.StatusPQSupported
 		rec.PQGroup = pq.state.CurveID.String()
 		return rec
