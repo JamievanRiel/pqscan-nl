@@ -41,6 +41,8 @@ var kinds = map[string]bool{
 	"Politie":                    true,
 }
 
+// organisatie is the part of an organisation record in the export that
+// govlist reads.
 type organisatie struct {
 	Naam      string   `xml:"naam"`
 	Types     []string `xml:"types>type"`
@@ -51,6 +53,7 @@ type organisatie struct {
 	} `xml:"contact>internetadressen>internetadres"`
 }
 
+// entry is one row of the output CSV.
 type entry struct{ domain, name, source string }
 
 func main() {
@@ -64,6 +67,9 @@ func main() {
 	}
 }
 
+// run parses the export at in, merges the extra entries from extraPath and
+// writes the CSV to out. Organisations that ended on or before today are
+// left out.
 func run(in, extraPath, out, today string) error {
 	f, err := os.Open(in)
 	if err != nil {
@@ -153,7 +159,7 @@ func parse(r io.Reader, today string) ([]entry, error) {
 		switch t := tok.(type) {
 		case xml.StartElement:
 			depth++
-			// overheidsorganisaties > organisaties > organisatie
+			// Top-level organisations are at overheidsorganisaties > organisaties > organisatie.
 			if t.Name.Local != "organisatie" || depth != 3 {
 				continue
 			}
@@ -189,7 +195,7 @@ func (o organisatie) domain(today string) string {
 		return ""
 	}
 	raw := ""
-	// Look for an address with label "algemeen", skipping register self-links
+	// Prefer the address labelled "algemeen" (general), skipping links to the register itself.
 	for _, a := range o.Adressen {
 		if strings.EqualFold(strings.TrimSpace(a.Label), "algemeen") {
 			if !isRegisterLink(a.URL) {
@@ -198,7 +204,7 @@ func (o organisatie) domain(today string) string {
 			}
 		}
 	}
-	// Fall back to first non-register address if no "algemeen" found
+	// Without one, fall back to the first address that is not on the register.
 	if raw == "" {
 		for _, a := range o.Adressen {
 			if !isRegisterLink(a.URL) {
@@ -210,23 +216,12 @@ func (o organisatie) domain(today string) string {
 	return hostOf(raw)
 }
 
-// isRegisterLink reports whether the URL is hosted on organisaties.overheid.nl.
-func isRegisterLink(rawURL string) bool {
-	rawURL = strings.TrimSpace(rawURL)
-	if rawURL == "" {
-		return false
-	}
-	if !strings.Contains(rawURL, "://") {
-		rawURL = "https://" + rawURL
-	}
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		return false
-	}
-	host := u.Hostname()
-	return strings.EqualFold(host, "organisaties.overheid.nl")
-}
+// isRegisterLink reports whether raw is hosted on organisaties.overheid.nl,
+// the register itself.
+func isRegisterLink(raw string) bool { return hostOf(raw) == "organisaties.overheid.nl" }
 
+// hostOf returns the normalized domain of a URL or bare host name, or ""
+// when raw is empty, unparsable or has no dot in its host.
 func hostOf(raw string) string {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {

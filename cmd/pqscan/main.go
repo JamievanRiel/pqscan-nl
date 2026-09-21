@@ -132,7 +132,7 @@ func runScan(ctx context.Context, args []string, stderr io.Writer) error {
 
 // checkUnreachable fails when so many domains are unreachable that the
 // runner's network is the likely cause rather than the websites.
-func checkUnreachable(recs []results.Record, max float64) error {
+func checkUnreachable(recs []results.Record, limit float64) error {
 	if len(recs) == 0 {
 		return errors.New("no records")
 	}
@@ -141,8 +141,8 @@ func checkUnreachable(recs []results.Record, max float64) error {
 		c.Add(r.Status)
 	}
 	frac := float64(c.Unreachable) / float64(c.Total)
-	if frac > max {
-		return fmt.Errorf("%.1f%% of %d domains unreachable (limit %.0f%%): not publishing", 100*frac, c.Total, 100*max)
+	if frac > limit {
+		return fmt.Errorf("%.1f%% of %d domains unreachable (limit %.0f%%): not publishing", 100*frac, c.Total, 100*limit)
 	}
 	return nil
 }
