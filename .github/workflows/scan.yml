@@ -26,9 +26,9 @@ jobs:
         run: go build -o pqscan ./cmd/pqscan
       - name: Download Tranco and ip2asn
         run: |
-          curl --fail --silent --show-error --location -o top-1m.csv.zip https://tranco-list.eu/top-1m.csv.zip
-          curl --fail --silent --show-error --location -o tranco-id.txt https://tranco-list.eu/top-1m-id
-          curl --fail --silent --show-error --location -o ip2asn-v4.tsv.gz https://iptoasn.com/data/ip2asn-v4.tsv.gz
+          curl --fail --silent --show-error --location --retry 3 --retry-all-errors -o top-1m.csv.zip https://tranco-list.eu/top-1m.csv.zip
+          curl --fail --silent --show-error --location --retry 3 --retry-all-errors -o tranco-id.txt https://tranco-list.eu/top-1m-id
+          curl --fail --silent --show-error --location --retry 3 --retry-all-errors -o ip2asn-v4.tsv.gz https://iptoasn.com/data/ip2asn-v4.tsv.gz
       - name: Build target list
         run: ./pqscan lists -tranco top-1m.csv.zip -sectors lists/sectors -exclude lists/exclude.txt -o targets.jsonl
       - name: Scan
@@ -38,6 +38,16 @@ jobs:
         run: |
           date=$(./pqscan report -scan scan.jsonl -tranco-id "$(cat tranco-id.txt)" -summaries data/summaries -site site)
           echo "date=$date" >> "$GITHUB_OUTPUT"
+      - name: Keep scan files for diagnosis
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: scan-debug
+          path: |
+            scan.jsonl
+            targets.jsonl
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Publish raw results
         env:
           GH_TOKEN: ${{ github.token }}
