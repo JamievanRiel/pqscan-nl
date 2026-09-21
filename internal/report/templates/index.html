@@ -27,7 +27,7 @@
   <p class="note">The networks that host the most reachable top .nl domains.</p>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Network</th><th class="num">AS</th><th class="num">Domains</th><th class="num">Post-quantum</th></tr></thead>
+      <thead><tr><th scope="col">Network</th><th scope="col" class="num">AS</th><th scope="col" class="num">Domains</th><th scope="col" class="num">Post-quantum</th></tr></thead>
       <tbody>
       {{- range .Providers}}
         <tr><td>{{.Org}}</td><td class="num">{{.ASN}}</td><td class="num">{{num .Reachable}}</td><td class="num">{{pct .PQPct}}%</td></tr>

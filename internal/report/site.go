@@ -122,7 +122,7 @@ func newPageData(summaries []results.Summary) pageData {
 	for _, name := range slices.Sorted(maps.Keys(latest.Sectors)) {
 		rows = append(rows, BarRow{Label: sectorName(name), Counts: latest.Sectors[name]})
 	}
-	d.Sectors = StackedBarsSVG(rows)
+	d.Sectors = SectorBars(rows)
 
 	for _, p := range latest.Providers {
 		d.Providers = append(d.Providers, providerRow{Org: p.Org, ASN: p.ASN, Reachable: p.Reachable(), PQPct: p.Pct(p.PQDefault)})
