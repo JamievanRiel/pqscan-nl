@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"slices"
+	"strconv"
 	"testing"
 	"time"
 
@@ -55,27 +56,27 @@ func TestProbe(t *testing.T) {
 
 	tests := []struct {
 		domain, status, host, group, pqGroup, version, errClass string
-		certValid                                               bool
+		certValid                                               *bool // nil: not evaluated
 	}{
-		{"pq.nl", "pq-default", "pq.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", true},
-		{"classic.nl", "classic", "classic.nl", "X25519", "", "1.3", "", true},
-		{"prefers-classic.nl", "pq-supported", "prefers-classic.nl", "X25519", "X25519MLKEM768", "1.3", "", true},
-		{"old.nl", "classic", "old.nl", "X25519", "", "1.2", "", true},
-		{"nist-pq.nl", "pq-supported", "nist-pq.nl", "X25519", "SecP256r1MLKEM768", "1.3", "", true},
-		{"expired.nl", "pq-default", "expired.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", false},
-		{"untrusted.nl", "pq-default", "untrusted.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", false},
-		{"wwwonly.nl", "pq-default", "www.wwwonly.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", true},
-		{"refused.nl", "unreachable", "", "", "", "", "refused", false},
-		{"missing.nl", "unreachable", "", "", "", "", "dns", false},
-		{"nottls.nl", "unreachable", "", "", "", "", "tls", false},
+		{"pq.nl", "pq-default", "pq.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", new(true)},
+		{"classic.nl", "classic", "classic.nl", "X25519", "", "1.3", "", new(true)},
+		{"prefers-classic.nl", "pq-supported", "prefers-classic.nl", "X25519", "X25519MLKEM768", "1.3", "", new(true)},
+		{"old.nl", "classic", "old.nl", "X25519", "", "1.2", "", new(true)},
+		{"nist-pq.nl", "pq-supported", "nist-pq.nl", "X25519", "SecP256r1MLKEM768", "1.3", "", new(true)},
+		{"expired.nl", "pq-default", "expired.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", new(false)},
+		{"untrusted.nl", "pq-default", "untrusted.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", new(false)},
+		{"wwwonly.nl", "pq-default", "www.wwwonly.nl", "X25519MLKEM768", "X25519MLKEM768", "1.3", "", new(true)},
+		{"refused.nl", "unreachable", "", "", "", "", "refused", nil},
+		{"missing.nl", "unreachable", "", "", "", "", "dns", nil},
+		{"nottls.nl", "unreachable", "", "", "", "", "tls", nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.domain, func(t *testing.T) {
 			r := p.Probe(context.Background(), results.Target{Domain: tt.domain, Sectors: []string{"banks"}, TrancoRank: 7})
 			if string(r.Status) != tt.status || r.Host != tt.host || r.Group != tt.group || r.PQGroup != tt.pqGroup ||
-				r.TLSVersion != tt.version || r.Error != tt.errClass || r.CertValid != tt.certValid {
-				t.Fatalf("got status=%s host=%s group=%s pq=%s tls=%s err=%s valid=%v; want %+v",
-					r.Status, r.Host, r.Group, r.PQGroup, r.TLSVersion, r.Error, r.CertValid, tt)
+				r.TLSVersion != tt.version || r.Error != tt.errClass || validity(r.CertValid) != validity(tt.certValid) {
+				t.Fatalf("got status=%s host=%s group=%s pq=%s tls=%s err=%s valid=%s; want %+v valid=%s",
+					r.Status, r.Host, r.Group, r.PQGroup, r.TLSVersion, r.Error, validity(r.CertValid), tt, validity(tt.certValid))
 			}
 			if r.Domain != tt.domain || r.TrancoRank != 7 || len(r.Sectors) != 1 || !r.ScannedAt.Equal(now) {
 				t.Errorf("target fields not carried over: %+v", r)
@@ -96,4 +97,12 @@ func TestProbeTimeout(t *testing.T) {
 	if r.Status != results.StatusUnreachable || r.Error != "timeout" {
 		t.Fatalf("got status=%s err=%s, want unreachable/timeout", r.Status, r.Error)
 	}
+}
+
+// validity describes a cert_valid value for test messages.
+func validity(v *bool) string {
+	if v == nil {
+		return "absent"
+	}
+	return strconv.FormatBool(*v)
 }

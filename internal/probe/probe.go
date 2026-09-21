@@ -193,7 +193,8 @@ func (p *Prober) Probe(ctx context.Context, t results.Target) results.Record {
 	if c.state.CurveID != 0 {
 		rec.Group = c.state.CurveID.String()
 	}
-	rec.CertIssuer, rec.CertValid = certInfo(c.state, host, p.Roots, p.now())
+	issuer, valid := certInfo(c.state, host, p.Roots, p.now())
+	rec.CertIssuer, rec.CertValid = issuer, new(valid)
 
 	if IsPQ(c.state.CurveID) {
 		rec.Status = results.StatusPQDefault

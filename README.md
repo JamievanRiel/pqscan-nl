@@ -66,7 +66,7 @@ python3 -m http.server -d site
 
 ## Data
 
-- **Raw results:** one JSON record per domain, attached to each [release](https://github.com/JamievanRiel/pqscan-nl/releases).
+- **Raw results:** one JSON record per domain, attached to each [release](https://github.com/JamievanRiel/pqscan-nl/releases). `cert_valid` is `true` or `false` when a handshake completed (whether the certificate verifies against the system roots, which does not affect the status) and absent for unreachable domains.
 - **Summaries:** counts per status, sector and hosting network in [`data/summaries`](data/summaries).
 - **Sector lists:** [`lists/sectors`](lists/sectors), every entry with its source. The government list is generated from the [Organisaties overheid](https://organisaties.overheid.nl/) register with `go run ./tools/govlist`.
 

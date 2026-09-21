@@ -28,7 +28,8 @@ type Target struct {
 	TrancoRank int      `json:"tranco_rank,omitempty"`
 }
 
-// Record is the result of scanning one target.
+// Record is the result of scanning one target. CertValid is nil when no
+// handshake completed, so the certificate was never evaluated.
 type Record struct {
 	Domain     string    `json:"domain"`
 	Host       string    `json:"host,omitempty"`
@@ -42,7 +43,7 @@ type Record struct {
 	Status     Status    `json:"status"`
 	PQGroup    string    `json:"pq_group,omitempty"`
 	CertIssuer string    `json:"cert_issuer,omitempty"`
-	CertValid  bool      `json:"cert_valid,omitempty"`
+	CertValid  *bool     `json:"cert_valid,omitempty"`
 	Error      string    `json:"error,omitempty"`
 	ScannedAt  time.Time `json:"scanned_at"`
 }
