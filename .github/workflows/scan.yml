@@ -1,0 +1,79 @@
+name: Weekly scan
+
+on:
+  schedule:
+    - cron: "0 2 * * 1" # Mondays 02:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: write # release + summary commit
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Build
+        run: go build -o pqscan ./cmd/pqscan
+      - name: Download Tranco and ip2asn
+        run: |
+          curl --fail --silent --show-error --location -o top-1m.csv.zip https://tranco-list.eu/top-1m.csv.zip
+          curl --fail --silent --show-error --location -o tranco-id.txt https://tranco-list.eu/top-1m-id
+          curl --fail --silent --show-error --location -o ip2asn-v4.tsv.gz https://iptoasn.com/data/ip2asn-v4.tsv.gz
+      - name: Build target list
+        run: ./pqscan lists -tranco top-1m.csv.zip -sectors lists/sectors -exclude lists/exclude.txt -o targets.jsonl
+      - name: Scan
+        run: ./pqscan scan -i targets.jsonl -asn ip2asn-v4.tsv.gz -o scan.jsonl
+      - name: Report
+        id: report
+        run: |
+          date=$(./pqscan report -scan scan.jsonl -tranco-id "$(cat tranco-id.txt)" -summaries data/summaries -site site)
+          echo "date=$date" >> "$GITHUB_OUTPUT"
+      - name: Publish raw results
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATE: ${{ steps.report.outputs.date }}
+        run: |
+          gzip -9 -c scan.jsonl > "scan-$DATE.jsonl.gz"
+          if gh release view "scan-$DATE" >/dev/null 2>&1; then
+            gh release upload "scan-$DATE" "scan-$DATE.jsonl.gz" --clobber
+          else
+            gh release create "scan-$DATE" "scan-$DATE.jsonl.gz" --title "Scan $DATE" \
+              --notes "Raw results of the scan on $DATE (Tranco list $(cat tranco-id.txt)). One JSON record per domain."
+          fi
+      - name: Commit summary
+        env:
+          DATE: ${{ steps.report.outputs.date }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/summaries
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add scan summary for $DATE"
+          git pull --rebase
+          git push
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: scan
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5
