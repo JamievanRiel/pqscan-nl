@@ -7,6 +7,8 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -34,23 +36,34 @@ func TestBuildSite(t *testing.T) {
 	if err := BuildSite(out, fixtureSectors(t), []results.Summary{earlier, latest}, recs); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"index.html", "search.html", "methodology.html", "findings.html", "style.css", "search.js", "domains.json", "scan-2026-09-28.jsonl.gz",
+	for _, name := range []string{"index.html", "search.html", "methodology.html", "data.html", "style.css", "search.js", "domains.json", "scan-2026-09-28.jsonl.gz",
 		"sectors/banks.csv", "sectors/government.csv", "summaries/2026-09-21.json", "summaries/2026-09-28.json"} {
 		if _, err := os.Stat(filepath.Join(out, name)); err != nil {
 			t.Errorf("missing %s: %v", name, err)
 		}
 	}
 
+	if _, err := os.Stat(filepath.Join(out, "findings.html")); err == nil {
+		t.Error("findings.html must be gone")
+	}
 	index, err := os.ReadFile(filepath.Join(out, "index.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"40.0%", "<polyline", "Banks", "Government", "KPN", `aria-current="page"`, "Tranco top 250k", "Tranco 250k–1M", "250,000"} {
+	for _, want := range []string{"40.0%", "95% CI 11.8–76.9%", `class="waffle"`, `<polygon class="band"`, `<ol class="findings">`,
+		"Figure 1.", "Figure 5.", "Table 3.", "Jamie van Riel", `aria-current="page"`, "250,001–1,000,000", "<code>X25519MLKEM768</code>"} {
 		if !bytes.Contains(index, []byte(want)) {
 			t.Errorf("index.html lacks %q", want)
 		}
 	}
 	golden(t, "index.golden.html", index)
+	for _, page := range []string{"methodology", "data"} {
+		b, err := os.ReadFile(filepath.Join(out, page+".html"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		golden(t, page+".golden.html", b)
+	}
 
 	search, _ := os.ReadFile(filepath.Join(out, "search.html"))
 	if !bytes.Contains(search, []byte(`src="search.js"`)) {
@@ -92,13 +105,15 @@ func TestBuildSite(t *testing.T) {
 	}
 }
 
-// The repository is private, so the public site must not link into it.
+// The repository is private, so the public site must not link into it, and
+// every relative link must resolve to a file in the site.
 func TestBuildSiteLinks(t *testing.T) {
 	recs := fixtureRecords()
 	out := t.TempDir()
 	if err := BuildSite(out, fixtureSectors(t), []results.Summary{Summarize(recs, "64X5X", 20)}, recs); err != nil {
 		t.Fatal(err)
 	}
+	attr := regexp.MustCompile(`(?:href|src)="([^"#?]+)`)
 	for _, page := range pages {
 		b, err := os.ReadFile(filepath.Join(out, page+".html"))
 		if err != nil {
@@ -112,18 +127,52 @@ func TestBuildSiteLinks(t *testing.T) {
 		if !bytes.Contains(b, []byte(`href="scan-2026-09-28.jsonl.gz"`)) {
 			t.Errorf("%s.html lacks a link to the raw data", page)
 		}
+		for _, m := range attr.FindAllSubmatch(b, -1) {
+			link := string(m[1])
+			if strings.Contains(link, ":") {
+				continue // absolute URL or data URI
+			}
+			if _, err := os.Stat(filepath.Join(out, link)); err != nil {
+				t.Errorf("%s.html links to missing %s", page, link)
+			}
+		}
 	}
 	methodology, _ := os.ReadFile(filepath.Join(out, "methodology.html"))
-	for _, want := range []string{"github.com/JamievanRiel/pqscan-nl-optout/issues/new", `href="sectors/banks.csv"`, `href="sectors/government.csv"`} {
-		if !bytes.Contains(methodology, []byte(want)) {
-			t.Errorf("methodology.html lacks %q", want)
+	if !bytes.Contains(methodology, []byte("github.com/JamievanRiel/pqscan-nl-optout/issues/new")) {
+		t.Error("methodology.html lacks the opt-out link")
+	}
+	data, _ := os.ReadFile(filepath.Join(out, "data.html"))
+	for _, want := range []string{`href="sectors/banks.csv"`, `href="summaries/2026-09-28.json"`, `id="cite"`, "@misc{vanriel2026pqscan,", "year         = {2026},"} {
+		if !bytes.Contains(data, []byte(want)) {
+			t.Errorf("data.html lacks %q", want)
 		}
 	}
 }
 
-func TestBuildSiteNeedsSummaries(t *testing.T) {
-	if err := BuildSite(t.TempDir(), t.TempDir(), nil, nil); err == nil {
-		t.Fatal("expected an error without summaries")
+func TestNewPageData(t *testing.T) {
+	recs := fixtureRecords()
+	d := newPageData([]results.Summary{Summarize(recs, "64X5X", 20)}, recs, nil)
+	if d.Headline != 40 || pct1(d.HeadLo) != "11.8" || pct1(d.HeadHi) != "76.9" {
+		t.Errorf("headline = %v (%v–%v), want 40 (11.8–76.9)", d.Headline, d.HeadLo, d.HeadHi)
+	}
+	if d.Tail != (results.Counts{Total: 1, PQDefault: 1}) {
+		t.Errorf("tail = %+v", d.Tail)
+	}
+	if d.Scanned != len(recs) || d.LatestDate != "28 September 2026" || d.Year != 2026 {
+		t.Errorf("scanned %d, date %q, year %d", d.Scanned, d.LatestDate, d.Year)
+	}
+	wantGroups := []shareRow{{Name: "X25519", N: 2, Pct: 40}, {Name: "X25519MLKEM768", Hybrid: true, N: 2, Pct: 40}, {Name: "P-256", N: 1, Pct: 20}}
+	if !reflect.DeepEqual(d.Groups, wantGroups) {
+		t.Errorf("groups = %+v", d.Groups)
+	}
+	if len(d.TLS) != 2 || d.TLS[0] != (shareRow{Name: "TLS 1.3", N: 4, Pct: 80}) {
+		t.Errorf("tls = %+v", d.TLS)
+	}
+	if len(d.Causes) != 2 || d.Causes[0] != (countRow{Name: "DNS failure", N: 1}) {
+		t.Errorf("causes = %+v", d.Causes)
+	}
+	if d.ScanWindow != "28 September 2026, 02:01 to 02:08 UTC" {
+		t.Errorf("scan window = %q", d.ScanWindow)
 	}
 }
 

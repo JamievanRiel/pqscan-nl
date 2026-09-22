@@ -1,4 +1,30 @@
-{{define "content"}}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Methodology · How quantum-safe is .nl?</title>
+<meta name="description" content="A weekly measurement of post-quantum TLS key exchange on Dutch websites.">
+<meta name="author" content="Jamie van Riel">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Methodology · How quantum-safe is .nl?">
+<meta property="og:description" content="A weekly measurement of post-quantum TLS key exchange on Dutch websites.">
+<meta property="og:url" content="https://jamievanriel.github.io/pqscan-nl/methodology.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2306765a'/%3E%3Cpath d='M11 15v-4a5 5 0 0 1 10 0v4' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Crect x='8' y='15' width='16' height='11' rx='2' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">How quantum-safe is .nl?</a>
+  <nav aria-label="Main">
+    <a href="index.html">Report</a>
+    <a href="methodology.html" aria-current="page">Methodology</a>
+    <a href="data.html">Data</a>
+    <a href="search.html">Search</a>
+  </nav>
+</header>
+<main>
+
 <article class="report">
 <header class="front">
   <h1>Methodology</h1>
@@ -7,8 +33,8 @@
 
 <section aria-labelledby="population">
   <h2 id="population"><span class="secno">1</span>Target population</h2>
-  <p>The headline figure, the trend and the hosting analysis cover the <code>.nl</code> domains ranked in the top {{num .Latest.TrancoTopRank}} of the <a href="https://tranco-list.eu/">Tranco list</a>, a research ranking of popular domains that combines several popularity rankings over 30 days. Each scan records the Tranco list ID, {{.Latest.TrancoListID}} for the latest scan, so its input can be reproduced.</p>
-  <p>The rest of the Tranco top 1 million is scanned as well and shown as a separate band. Below rank {{num .Latest.TrancoTopRank}}, the <code>.nl</code> domains include thousands of similar, apparently generated names, most of them hosted on one network. In the latest scan that part held {{num .Tail.Reachable}} reachable domains, {{pct (.Tail.Pct .Tail.PQDefault)}}% of them post-quantum by default. Counting them in the main figure would make it mostly a measure of that network.</p>
+  <p>The headline figure, the trend and the hosting analysis cover the <code>.nl</code> domains ranked in the top 250,000 of the <a href="https://tranco-list.eu/">Tranco list</a>, a research ranking of popular domains that combines several popularity rankings over 30 days. Each scan records the Tranco list ID, 64X5X for the latest scan, so its input can be reproduced.</p>
+  <p>The rest of the Tranco top 1 million is scanned as well and shown as a separate band. Below rank 250,000, the <code>.nl</code> domains include thousands of similar, apparently generated names, most of them hosted on one network. In the latest scan that part held 1 reachable domains, 100.0% of them post-quantum by default. Counting them in the main figure would make it mostly a measure of that network.</p>
   <p>The sector comparison uses curated lists with a source for every entry, so it includes organisations whose domains are not in the Tranco list:</p>
   <ul>
     <li><strong>Government:</strong> ministries, provinces, municipalities, water boards, agencies, independent administrative bodies, inspectorates, High Councils of State, the judiciary and the police, taken from the <a href="https://organisaties.overheid.nl/">Organisaties overheid</a> register, plus national services that the register lists as part of a ministry, such as the Belastingdienst.</li>
@@ -51,16 +77,16 @@
   <h2 id="statistics"><span class="secno">5</span>Statistical analysis</h2>
   <p>Every percentage is a share of reachable domains. Domains where no TLS handshake completed are left out of the denominator and reported in the coverage section of the report.</p>
   <p>Intervals are 95% Wilson score intervals. They describe the uncertainty that comes from the number of domains behind an estimate, not from the choice of population or from measurement error. The Wilson interval stays within 0–100% and holds up for small groups and for shares near 0 or 100%, where the usual normal approximation fails.</p>
-  <p>Networks and sectors with fewer than {{.MinSample}} reachable domains are left out of the figures and the findings; below that size one domain moves the share by more than five percentage points. Percentages are rounded to one decimal.</p>
+  <p>Networks and sectors with fewer than 20 reachable domains are left out of the figures and the findings; below that size one domain moves the share by more than five percentage points. Percentages are rounded to one decimal.</p>
   <p>The key findings on the report page are generated from the latest scan with fixed sentence templates. A finding is only shown when the data it describes is there, so the list can change from week to week.</p>
 </section>
 
 <section aria-labelledby="reproducibility">
   <h2 id="reproducibility"><span class="secno">6</span>Reproducibility</h2>
   <dl class="meta">
-    <div><dt>Tranco list</dt><dd><a href="https://tranco-list.eu/list/{{.Latest.TrancoListID}}/1000000">{{.Latest.TrancoListID}}</a></dd></div>
-    <div><dt>Scanner version</dt><dd>{{with .Revision}}Commit <code>{{.}}</code>{{else}}Not recorded{{end}}</dd></div>
-    <div><dt>Scan window</dt><dd>{{.ScanWindow}}</dd></div>
+    <div><dt>Tranco list</dt><dd><a href="https://tranco-list.eu/list/64X5X/1000000">64X5X</a></dd></div>
+    <div><dt>Scanner version</dt><dd>Not recorded</dd></div>
+    <div><dt>Scan window</dt><dd>28 September 2026, 02:01 to 02:08 UTC</dd></div>
     <div><dt>Vantage point</dt><dd>A GitHub Actions runner (<code>ubuntu-latest</code>) in the United States, IPv4 only</dd></div>
     <div><dt>Hosting data</dt><dd>iptoasn.com IPv4 table of the scan day</dd></div>
     <div><dt>Data</dt><dd>Raw results, sector lists and summaries on the <a href="data.html">data page</a></dd></div>
@@ -91,4 +117,10 @@
   </dl>
 </section>
 </article>
-{{end}}
+
+</main>
+<footer class="site-footer">
+  <p>Latest scan 28 September 2026, Tranco list 64X5X. By <a href="https://github.com/JamievanRiel">Jamie van Riel</a>. <a href="scan-2026-09-28.jsonl.gz">Raw data</a> and <a href="data.html#cite">how to cite</a>.</p>
+</footer>
+</body>
+</html>

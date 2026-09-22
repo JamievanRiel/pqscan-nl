@@ -1,47 +1,127 @@
 {{define "content"}}
-<section class="hero">
-  <p class="eyebrow">Weekly scan · {{.Latest.Date}}</p>
-  <h1><span class="big">{{pct .Headline}}%</span> of the top .nl websites protect visitors with post-quantum key exchange</h1>
-  <p class="lead">Of the {{num .Latest.TrancoTop.Reachable}} reachable .nl domains in the <a href="https://tranco-list.eu/">Tranco top {{num .Latest.TrancoTopRank}}</a>, {{num .Latest.TrancoTop.PQDefault}} use a hybrid post-quantum key exchange with a current browser. Another {{num .Latest.TrancoTop.PQSupported}} support it but do not choose it by default. The rest of the top 1 million is shown separately, see the <a href="methodology.html#sectors">methodology</a>.</p>
-</section>
+<article class="report">
+<header class="front">
+  <h1>How quantum-safe is .nl?</h1>
+  <p class="subtitle">A weekly measurement of post-quantum key exchange on Dutch websites</p>
+  <dl class="meta">
+    <div><dt>Author</dt><dd><a href="https://github.com/JamievanRiel">Jamie van Riel</a></dd></div>
+    <div><dt>Latest scan</dt><dd>{{.LatestDate}}</dd></div>
+    <div><dt>Domains</dt><dd>{{num .Scanned}} scanned every week</dd></div>
+    <div><dt>Tranco list</dt><dd>{{.Latest.TrancoListID}}</dd></div>
+    <div><dt>Cite</dt><dd><a href="data.html#cite">How to cite this report</a></dd></div>
+  </dl>
+</header>
 
-<section>
-  <h2>Trend</h2>
-  <p class="note">Share of reachable top .nl domains that use post-quantum key exchange by default, per weekly scan.</p>
-  {{.Trend}}
-</section>
-
-<section>
-  <h2>By sector</h2>
+<figure class="hero">
+  <p class="headline">Of the {{num .Latest.TrancoTop.Reachable}} reachable .nl websites in the Tranco top {{num .Latest.TrancoTopRank}}, {{num .Latest.TrancoTop.PQDefault}} protect their visitors with a post-quantum key exchange: {{pct .Headline}}% (95% CI {{pct .HeadLo}}–{{pct .HeadHi}}%).</p>
+  {{.Waffle}}
   <ul class="legend">
-    <li><span class="swatch seg-pq"></span>Post-quantum by default</li>
-    <li><span class="swatch seg-sup"></span>Supported, not default</li>
-    <li><span class="swatch seg-classic"></span>Classic only</li>
+    <li><span class="swatch pq"></span>Post-quantum by default</li>
+    <li><span class="swatch other"></span>Classic, or post-quantum only on request</li>
   </ul>
-  {{.Sectors}}
-  <p class="note">Shares are of reachable domains; the number on the right is post-quantum by default. Sector lists are curated, see the <a href="methodology.html#sectors">methodology</a>.</p>
+  <figcaption><span class="fig">Figure 1.</span> One square per reachable domain, ordered by Tranco rank from the top left. Source: scan of {{.LatestDate}}.</figcaption>
+</figure>
+
+<section class="summary" aria-labelledby="summary">
+  <h2 id="summary">Summary</h2>
+  <p>Encrypted traffic recorded today can be decrypted later if the key exchange that protected it is broken by a quantum computer. A hybrid post-quantum key exchange such as X25519MLKEM768 closes that gap, and every current browser offers one. This report measures every week which Dutch websites accept it: the .nl domains in the Tranco top 1 million and curated lists of banks, government bodies, hospitals and web shops, {{num .Scanned}} domains in total.</p>
+  <ol class="findings">
+    {{- range .Findings}}
+    <li>{{.}}</li>
+    {{- end}}
+  </ol>
 </section>
 
-<section>
-  <h2>By hosting network</h2>
-  <p class="note">The networks that host the most reachable top .nl domains.</p>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th scope="col">Network</th><th scope="col" class="num">AS</th><th scope="col" class="num">Domains</th><th scope="col" class="num">Post-quantum</th></tr></thead>
-      <tbody>
-      {{- range .Providers}}
-        <tr><td>{{.Org}}</td><td class="num">{{.ASN}}</td><td class="num">{{num .Reachable}}</td><td class="num">{{pct .PQPct}}%</td></tr>
-      {{- end}}
-      </tbody>
-    </table>
+<section aria-labelledby="s-trend">
+  <h2 id="s-trend"><span class="secno">1</span>Adoption over time</h2>
+  <figure>
+    {{.Trend}}
+    <figcaption><span class="fig">Figure 2.</span> Share of reachable .nl domains in the Tranco top {{num .Latest.TrancoTopRank}} that use post-quantum key exchange by default, per weekly scan. The band is the 95% Wilson interval.</figcaption>
+  </figure>
+  <details class="data-table">
+    <summary>Show the data</summary>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Scan</th><th scope="col" class="num">Reachable</th><th scope="col" class="num">Post-quantum</th><th scope="col" class="num">95% CI</th></tr></thead>
+        <tbody>
+        {{- range .TrendRows}}
+          <tr><td>{{.Date}}</td><td class="num">{{num .N}}</td><td class="num">{{pct .Pct}}%</td><td class="num">{{pct .Lo}}–{{pct .Hi}}%</td></tr>
+        {{- end}}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<section aria-labelledby="s-rank">
+  <h2 id="s-rank"><span class="secno">2</span>Adoption by popularity</h2>
+  <p>Figure 3 splits the population by Tranco rank, to show whether adoption depends on how popular a site is.</p>
+  <figure>
+    {{.ByRank}}
+    <figcaption><span class="fig">Figure 3.</span> Post-quantum by default per Tranco rank band. Dots are estimates, whiskers 95% Wilson intervals, n is the number of reachable domains. The grey band lies outside the headline figure; see the <a href="methodology.html#population">methodology</a>. Source: scan of {{.LatestDate}}.</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="s-sectors">
+  <h2 id="s-sectors"><span class="secno">3</span>Sectors</h2>
+  <figure>
+    {{if .Sectors}}{{.Sectors}}{{else}}<p class="empty">No sector has at least {{.MinSample}} reachable domains in this scan.</p>{{end}}
+    <figcaption><span class="fig">Figure 4.</span> Post-quantum by default per sector, from curated lists that include domains outside the Tranco list. Sectors with fewer than {{.MinSample}} reachable domains are left out. Source: scan of {{.LatestDate}}.</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="s-networks">
+  <h2 id="s-networks"><span class="secno">4</span>Hosting networks</h2>
+  <p>A content delivery network terminates TLS for the sites it serves, so its configuration decides the key exchange for all of them.{{with .Concentration}} {{.}}{{end}}</p>
+  <figure>
+    {{if .Networks}}{{.Networks}}{{else}}<p class="empty">No network hosts at least {{.MinSample}} reachable domains in this scan.</p>{{end}}
+    <figcaption><span class="fig">Figure 5.</span> Post-quantum by default per hosting network (autonomous system), for networks with at least {{.MinSample}} reachable domains in the Tranco top {{num .Latest.TrancoTopRank}}, highest first. Source: scan of {{.LatestDate}}.</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="s-protocol">
+  <h2 id="s-protocol"><span class="secno">5</span>Protocol</h2>
+  <p>The hybrid groups are only defined for TLS 1.3, so a server that negotiates TLS 1.2 cannot use them. Table 1 lists the group each server chose in the default handshake, Table 2 the TLS version.</p>
+  <div class="tables">
+    <figure class="table">
+      <figcaption><span class="fig">Table 1.</span> Key exchange group chosen with a current browser.</figcaption>
+      <table>
+        <thead><tr><th scope="col">Group</th><th scope="col" class="num">Domains</th><th scope="col" class="num">Share</th></tr></thead>
+        <tbody>
+        {{- range .Groups}}
+          <tr><td><code>{{.Name}}</code>{{if .Hybrid}} <span class="tag">hybrid</span>{{end}}</td><td class="num">{{num .N}}</td><td class="num">{{pct .Pct}}%</td></tr>
+        {{- end}}
+        </tbody>
+      </table>
+    </figure>
+    <figure class="table">
+      <figcaption><span class="fig">Table 2.</span> TLS version chosen with a current browser.</figcaption>
+      <table>
+        <thead><tr><th scope="col">Version</th><th scope="col" class="num">Domains</th><th scope="col" class="num">Share</th></tr></thead>
+        <tbody>
+        {{- range .TLS}}
+          <tr><td>{{.Name}}</td><td class="num">{{num .N}}</td><td class="num">{{pct .Pct}}%</td></tr>
+        {{- end}}
+        </tbody>
+      </table>
+    </figure>
   </div>
 </section>
 
-<section>
-  <h2>Not reachable</h2>
-  <p>{{num .Latest.TrancoTop.Unreachable}} top .nl domains did not complete a TLS handshake on port 443, on the domain or its www host. They are left out of every percentage.</p>
-  {{- with .Causes}}
-  <p class="note">By cause, across all scanned domains: {{.}}.</p>
-  {{- end}}
+<section aria-labelledby="s-coverage">
+  <h2 id="s-coverage"><span class="secno">6</span>Coverage</h2>
+  <p>{{num .Latest.TrancoTop.Unreachable}} of the {{num .Latest.TrancoTop.Total}} domains in the Tranco top {{num .Latest.TrancoTopRank}} ({{pct .UnreachablePct}}%) did not complete a TLS handshake on port 443, on the domain or its www host. They are left out of every percentage.</p>
+  <figure class="table">
+    <figcaption><span class="fig">Table 3.</span> Unreachable domains by cause, across all {{num .Scanned}} scanned domains.</figcaption>
+    <table>
+      <thead><tr><th scope="col">Cause</th><th scope="col" class="num">Domains</th></tr></thead>
+      <tbody>
+      {{- range .Causes}}
+        <tr><td>{{.Name}}</td><td class="num">{{num .N}}</td></tr>
+      {{- end}}
+      </tbody>
+    </table>
+  </figure>
 </section>
+</article>
 {{end}}

@@ -2,6 +2,7 @@ package report
 
 import (
 	"bytes"
+	"cmp"
 	"compress/gzip"
 	"embed"
 	"encoding/json"
@@ -14,6 +15,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/JamievanRiel/pqscan-nl/internal/results"
 )
@@ -21,24 +23,50 @@ import (
 //go:embed templates/*.html assets/*
 var files embed.FS
 
-type providerRow struct {
-	Org       string
-	ASN       uint32
-	Reachable int
-	PQPct     float64
-}
-
 // pageData is what every page template renders.
 type pageData struct {
-	Title     string
-	Page      string
-	Latest    results.Summary
-	Tail      results.Counts // Tranco domains ranked below Latest.TrancoTopRank
-	Headline  float64
-	Trend     template.HTML
-	Sectors   template.HTML
-	Providers []providerRow
-	Causes    string // e.g. "DNS failure 1, timeout 1"
+	Title, Page    string
+	Latest         results.Summary
+	LatestDate     string // "22 September 2026"
+	ScanWindow     string // "22 September 2026, 06:54 to 06:59 UTC"
+	Revision       string // short commit of the pqscan build, "" if unknown
+	Year           int
+	Scanned        int            // domains in the latest scan
+	Tail           results.Counts // Tranco domains ranked below Latest.TrancoTopRank
+	Headline       float64
+	HeadLo, HeadHi float64
+	UnreachablePct float64 // of the TrancoTop domains
+	MinSample      int
+	Findings       []string
+	Concentration  string
+	Waffle         template.HTML
+	Trend          template.HTML
+	TrendRows      []trendRow
+	ByRank         template.HTML
+	Sectors        template.HTML
+	Networks       template.HTML
+	Groups, TLS    []shareRow
+	Causes         []countRow
+	Downloads      []download
+}
+
+type trendRow struct {
+	Date        string
+	N           int
+	Pct, Lo, Hi float64
+}
+
+// shareRow is one row of a protocol table.
+type shareRow struct {
+	Name   string
+	Hybrid bool
+	N      int
+	Pct    float64
+}
+
+type countRow struct {
+	Name string
+	N    int
 }
 
 // domainEntry is one row of domains.json. Keys are short because the file
@@ -50,13 +78,13 @@ type domainEntry struct {
 	Provider string `json:"p,omitempty"`
 }
 
-var pages = []string{"index", "search", "methodology", "findings"}
+var pages = []string{"index", "methodology", "data", "search"}
 
 var pageTitles = map[string]string{
 	"index":       "How quantum-safe is .nl?",
-	"search":      "Look up a domain · How quantum-safe is .nl?",
 	"methodology": "Methodology · How quantum-safe is .nl?",
-	"findings":    "Findings · How quantum-safe is .nl?",
+	"data":        "Data · How quantum-safe is .nl?",
+	"search":      "Look up a domain · How quantum-safe is .nl?",
 }
 
 var sectorNames = map[string]string{
@@ -68,10 +96,16 @@ var sectorNames = map[string]string{
 
 var causeNames = map[string]string{
 	"dns":     "DNS failure",
-	"timeout": "timeout",
-	"refused": "connection refused",
+	"timeout": "Timeout",
+	"refused": "Connection refused",
 	"tls":     "TLS error",
-	"other":   "other error",
+	"other":   "Other error",
+}
+
+var groupNames = map[string]string{
+	"CurveP256": "P-256",
+	"CurveP384": "P-384",
+	"CurveP521": "P-521",
 }
 
 var funcs = template.FuncMap{
@@ -166,9 +200,13 @@ func copySectorLists(dir, outDir string) ([]download, error) {
 			return nil, err
 		}
 		entries := strings.Count(strings.TrimSpace(string(b)), "\n") // lines after the header
+		noun := "entries"
+		if entries == 1 {
+			noun = "entry"
+		}
 		out = append(out, download{
 			Path:        "sectors/" + base,
-			Description: fmt.Sprintf("%s sector list, %s entries with their sources", sectorName(strings.TrimSuffix(base, ".csv")), thousands(entries)),
+			Description: fmt.Sprintf("%s sector list, %s %s with their sources", sectorName(strings.TrimSuffix(base, ".csv")), thousands(entries), noun),
 			Format:      "CSV",
 			Size:        humanSize(int64(len(b))),
 		})
@@ -199,25 +237,72 @@ func humanSize(n int64) string {
 }
 
 func newPageData(summaries []results.Summary, latest []results.Record, downloads []download) pageData {
-	last := summaries[len(summaries)-1]
+	s := summaries[len(summaries)-1]
+	top := s.TrancoTop
 	d := pageData{
-		Latest:   last,
-		Tail:     minus(last.Tranco, last.TrancoTop),
-		Headline: last.TrancoTop.Pct(last.TrancoTop.PQDefault),
+		Latest:        s,
+		LatestDate:    longDate(s.Date),
+		ScanWindow:    scanWindow(s),
+		Revision:      shortRevision(s.Revision),
+		Year:          s.StartedAt.Year(),
+		Scanned:       len(latest),
+		Tail:          minus(s.Tranco, top),
+		Headline:      top.Pct(top.PQDefault),
+		MinSample:     MinSample,
+		Findings:      KeyFindings(s),
+		Concentration: Concentration(s),
+		Downloads:     downloads,
+	}
+	d.HeadLo, d.HeadHi = Wilson(top.PQDefault, top.Reachable())
+	if top.Total > 0 {
+		d.UnreachablePct = 100 * float64(top.Unreachable) / float64(top.Total)
 	}
 
-	trend := make([]TrendPoint, len(summaries))
-	for i, s := range summaries {
-		trend[i] = TrendPoint{Date: s.Date, Pct: s.TrancoTop.Pct(s.TrancoTop.PQDefault)}
-	}
-	d.Trend = TrendSVG(trend)
+	cells := waffleCells(latest, s.TrancoTopRank)
+	d.Waffle = Waffle(cells, min(60, len(cells)))
 
-	d.Sectors = DotPlot(nil)
-
-	for _, p := range last.Providers {
-		d.Providers = append(d.Providers, providerRow{Org: p.Org, ASN: p.ASN, Reachable: p.Reachable(), PQPct: p.Pct(p.PQDefault)})
+	points := make([]TrendPoint, len(summaries))
+	for i, sum := range summaries {
+		c := sum.TrancoTop
+		lo, hi := Wilson(c.PQDefault, c.Reachable())
+		points[i] = TrendPoint{Date: sum.Date, Pct: c.Pct(c.PQDefault), Lo: lo, Hi: hi}
+		d.TrendRows = append(d.TrendRows, trendRow{Date: sum.Date, N: c.Reachable(), Pct: points[i].Pct, Lo: lo, Hi: hi})
 	}
-	d.Causes = describeCauses(last.UnreachableByError)
+	d.Trend = TrendSVG(points)
+
+	var rank []DotRow
+	for _, b := range s.ByRank {
+		rank = append(rank, dotRow(thousands(b.From)+"–"+thousands(b.To), b.Counts, b.From > s.TrancoTopRank))
+	}
+	d.ByRank = DotPlot(rank)
+
+	var sectors []DotRow
+	for _, sec := range eligibleSectors(s.Sectors) {
+		sectors = append(sectors, dotRow(sectorName(sec.name), sec.c, false))
+	}
+	d.Sectors = DotPlot(sectors)
+
+	var nets []DotRow
+	for _, p := range eligibleNetworks(s.Providers) {
+		nets = append(nets, dotRow(fmt.Sprintf("%s (AS%d)", NetworkName(p.Org), p.ASN), p.Counts, false))
+	}
+	d.Networks = DotPlot(nets)
+
+	d.Groups = shares(s.Groups, func(g string) (string, bool) {
+		if n, ok := groupNames[g]; ok {
+			return n, false
+		}
+		return g, strings.Contains(g, "MLKEM")
+	})
+	d.TLS = shares(s.TLSVersions, func(v string) (string, bool) { return "TLS " + v, false })
+	for _, k := range slices.Sorted(maps.Keys(s.UnreachableByError)) {
+		name := causeNames[k]
+		if name == "" {
+			name = k
+		}
+		d.Causes = append(d.Causes, countRow{Name: name, N: s.UnreachableByError[k]})
+	}
+	slices.SortStableFunc(d.Causes, func(a, b countRow) int { return cmp.Compare(b.N, a.N) })
 	return d
 }
 
@@ -232,17 +317,72 @@ func minus(a, b results.Counts) results.Counts {
 	}
 }
 
-// describeCauses lists unreachable causes alphabetically: "DNS failure 1, timeout 1".
-func describeCauses(m map[string]int) string {
-	var parts []string
-	for _, k := range slices.Sorted(maps.Keys(m)) {
-		name := causeNames[k]
-		if name == "" {
-			name = k
-		}
-		parts = append(parts, name+" "+thousands(m[k]))
+func dotRow(label string, c results.Counts, muted bool) DotRow {
+	lo, hi := Wilson(c.PQDefault, c.Reachable())
+	return DotRow{Label: label, N: c.Reachable(), Est: c.Pct(c.PQDefault), Lo: lo, Hi: hi, Muted: muted}
+}
+
+// shares turns counts into table rows, largest first, then by name.
+func shares(m map[string]int, name func(string) (string, bool)) []shareRow {
+	total := sum(m)
+	var out []shareRow
+	for k, n := range m {
+		label, hybrid := name(k)
+		out = append(out, shareRow{Name: label, Hybrid: hybrid, N: n, Pct: 100 * float64(n) / float64(total)})
 	}
-	return strings.Join(parts, ", ")
+	slices.SortFunc(out, func(a, b shareRow) int {
+		if c := cmp.Compare(b.N, a.N); c != 0 {
+			return c
+		}
+		return strings.Compare(a.Name, b.Name)
+	})
+	return out
+}
+
+// waffleCells returns, in rank order, whether each reachable domain ranked
+// topRank or better is post-quantum by default.
+func waffleCells(recs []results.Record, topRank int) []bool {
+	var top []results.Record
+	for _, r := range recs {
+		if r.TrancoRank > 0 && r.TrancoRank <= topRank && r.Status != results.StatusUnreachable {
+			top = append(top, r)
+		}
+	}
+	slices.SortFunc(top, func(a, b results.Record) int { return cmp.Compare(a.TrancoRank, b.TrancoRank) })
+	cells := make([]bool, len(top))
+	for i, r := range top {
+		cells[i] = r.Status == results.StatusPQDefault
+	}
+	return cells
+}
+
+// longDate turns 2026-09-22 into 22 September 2026.
+func longDate(date string) string {
+	t, err := time.Parse(time.DateOnly, date)
+	if err != nil {
+		return date
+	}
+	return t.Format("2 January 2006")
+}
+
+func scanWindow(s results.Summary) string {
+	a, b := s.StartedAt.UTC(), s.FinishedAt.UTC()
+	if a.Format(time.DateOnly) == b.Format(time.DateOnly) {
+		return a.Format("2 January 2006, 15:04") + " to " + b.Format("15:04") + " UTC"
+	}
+	return a.Format("2 January 2006 15:04") + " to " + b.Format("2 January 2006 15:04") + " UTC"
+}
+
+// shortRevision keeps the first 12 characters of a commit hash and a -dirty suffix.
+func shortRevision(rev string) string {
+	rev, dirty := strings.CutSuffix(rev, "-dirty")
+	if len(rev) > 12 {
+		rev = rev[:12]
+	}
+	if dirty {
+		rev += "-dirty"
+	}
+	return rev
 }
 
 func renderPage(page string, d pageData) ([]byte, error) {

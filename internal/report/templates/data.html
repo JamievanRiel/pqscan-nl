@@ -1,0 +1,63 @@
+{{define "content"}}
+<article class="report">
+<header class="front">
+  <h1>Data</h1>
+  <p class="subtitle">The files behind the report, so every figure can be checked</p>
+</header>
+
+<section aria-labelledby="downloads">
+  <h2 id="downloads"><span class="secno">1</span>Downloads</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">File</th><th scope="col">Contents</th><th scope="col">Format</th><th scope="col" class="num">Size</th></tr></thead>
+      <tbody>
+      {{- range .Downloads}}
+        <tr><td><a href="{{.Path}}">{{.Path}}</a></td><td>{{.Description}}</td><td>{{.Format}}</td><td class="num">{{.Size}}</td></tr>
+      {{- end}}
+      </tbody>
+    </table>
+  </div>
+  <p>Raw results of earlier scans are archived but not published on this site.</p>
+</section>
+
+<section aria-labelledby="schema">
+  <h2 id="schema"><span class="secno">2</span>Record schema</h2>
+  <p>Each line of the raw results is one JSON object. Empty fields are left out.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>domain</code></td><td>string</td><td>The scanned domain, lowercase, without <code>www.</code></td></tr>
+        <tr><td><code>host</code></td><td>string</td><td>The host that completed the handshake: the domain or its <code>www.</code> host</td></tr>
+        <tr><td><code>sectors</code></td><td>array</td><td>Sector lists the domain is on</td></tr>
+        <tr><td><code>tranco_rank</code></td><td>integer</td><td>Rank in the Tranco list; absent for sector-only domains</td></tr>
+        <tr><td><code>ip</code></td><td>string</td><td>IPv4 address that answered</td></tr>
+        <tr><td><code>asn</code>, <code>as_org</code></td><td>integer, string</td><td>Autonomous system of that address and its name in the iptoasn.com table</td></tr>
+        <tr><td><code>tls_version</code></td><td>string</td><td><code>1.2</code> or <code>1.3</code>, from the default handshake</td></tr>
+        <tr><td><code>group</code></td><td>string</td><td>Key exchange group of the default handshake</td></tr>
+        <tr><td><code>status</code></td><td>string</td><td><code>pq-default</code>, <code>pq-supported</code>, <code>classic</code> or <code>unreachable</code></td></tr>
+        <tr><td><code>pq_group</code></td><td>string</td><td>The hybrid group used, for <code>pq-default</code> and <code>pq-supported</code></td></tr>
+        <tr><td><code>cert_issuer</code></td><td>string</td><td>Organisation of the certificate issuer</td></tr>
+        <tr><td><code>cert_valid</code></td><td>boolean</td><td>Whether the certificate verifies against the system roots; absent when no handshake completed</td></tr>
+        <tr><td><code>error</code></td><td>string</td><td>For unreachable domains: <code>dns</code>, <code>timeout</code>, <code>refused</code>, <code>tls</code> or <code>other</code></td></tr>
+        <tr><td><code>scanned_at</code></td><td>string</td><td>Time of the scan, RFC 3339 in UTC</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="cite">
+  <h2 id="cite"><span class="secno">3</span>How to cite</h2>
+  <p>Cite the report with the date of the scan you used.</p>
+  <p class="citation">van Riel, J. ({{.Year}}). <cite>How quantum-safe is .nl? A weekly measurement of post-quantum key exchange on Dutch websites.</cite> Scan of {{.LatestDate}}. https://jamievanriel.github.io/pqscan-nl/</p>
+  <pre class="bibtex"><code>@misc{vanriel{{.Year}}pqscan,
+  author       = {Jamie van Riel},
+  title        = {How quantum-safe is .nl? A weekly measurement of
+                  post-quantum key exchange on Dutch websites},
+  year         = {{"{"}}{{.Year}}{{"}"}},
+  howpublished = {\url{https://jamievanriel.github.io/pqscan-nl/}},
+  note         = {Scan of {{.Latest.Date}}, Tranco list {{.Latest.TrancoListID}}}
+}</code></pre>
+</section>
+</article>
+{{end}}
