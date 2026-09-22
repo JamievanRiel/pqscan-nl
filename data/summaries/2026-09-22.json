@@ -1,22 +1,80 @@
 {
   "date": "2026-09-22",
   "tranco_list_id": "8P4GV",
-  "started_at": "2026-09-22T06:55:05.578346213Z",
-  "finished_at": "2026-09-22T06:58:48.234996615Z",
+  "revision": "8607438b7c51894a3018cb8c2ebd76e170e0be0d",
+  "started_at": "2026-09-22T08:35:30.562412193Z",
+  "finished_at": "2026-09-22T08:39:37.163828051Z",
   "tranco": {
     "total": 19049,
-    "pq_default": 13314,
-    "pq_supported": 6,
-    "classic": 5153,
-    "unreachable": 576
+    "pq_default": 13315,
+    "pq_supported": 5,
+    "classic": 5158,
+    "unreachable": 571
   },
   "tranco_top_rank": 250000,
   "tranco_top": {
     "total": 1866,
-    "pq_default": 790,
-    "pq_supported": 2,
+    "pq_default": 788,
+    "pq_supported": 1,
     "classic": 962,
-    "unreachable": 112
+    "unreachable": 115
+  },
+  "by_rank": [
+    {
+      "from": 1,
+      "to": 10000,
+      "total": 45,
+      "pq_default": 18,
+      "pq_supported": 0,
+      "classic": 26,
+      "unreachable": 1
+    },
+    {
+      "from": 10001,
+      "to": 50000,
+      "total": 253,
+      "pq_default": 120,
+      "pq_supported": 0,
+      "classic": 121,
+      "unreachable": 12
+    },
+    {
+      "from": 50001,
+      "to": 100000,
+      "total": 360,
+      "pq_default": 155,
+      "pq_supported": 0,
+      "classic": 184,
+      "unreachable": 21
+    },
+    {
+      "from": 100001,
+      "to": 250000,
+      "total": 1208,
+      "pq_default": 495,
+      "pq_supported": 1,
+      "classic": 631,
+      "unreachable": 81
+    },
+    {
+      "from": 250001,
+      "to": 1000000,
+      "total": 17183,
+      "pq_default": 12527,
+      "pq_supported": 4,
+      "classic": 4196,
+      "unreachable": 456
+    }
+  ],
+  "groups": {
+    "CurveP256": 122,
+    "CurveP384": 63,
+    "X25519": 778,
+    "X25519MLKEM768": 788
+  },
+  "tls_versions": {
+    "1.2": 160,
+    "1.3": 1591
   },
   "sectors": {
     "banks": {
@@ -29,8 +87,8 @@
     "government": {
       "total": 524,
       "pq_default": 80,
-      "pq_supported": 0,
-      "classic": 442,
+      "pq_supported": 1,
+      "classic": 441,
       "unreachable": 2
     },
     "hospitals": {
@@ -52,8 +110,8 @@
     {
       "asn": 13335,
       "org": "CLOUDFLARENET",
-      "total": 429,
-      "pq_default": 416,
+      "total": 430,
+      "pq_default": 417,
       "pq_supported": 0,
       "classic": 13,
       "unreachable": 0
@@ -71,18 +129,18 @@
       "asn": 8075,
       "org": "MICROSOFT-CORP-MSN-AS-BLOCK",
       "total": 107,
-      "pq_default": 10,
+      "pq_default": 7,
       "pq_supported": 0,
-      "classic": 97,
+      "classic": 100,
       "unreachable": 0
     },
     {
       "asn": 20857,
       "org": "TRANSIP-AS Amsterdam, the Netherlands",
-      "total": 72,
+      "total": 71,
       "pq_default": 4,
       "pq_supported": 0,
-      "classic": 68,
+      "classic": 67,
       "unreachable": 0
     },
     {
@@ -97,10 +155,10 @@
     {
       "asn": 24940,
       "org": "HETZNER-AS",
-      "total": 58,
+      "total": 57,
       "pq_default": 28,
       "pq_supported": 0,
-      "classic": 30,
+      "classic": 29,
       "unreachable": 0
     },
     {
@@ -108,8 +166,8 @@
       "org": "GOOGLE-CLOUD-PLATFORM",
       "total": 45,
       "pq_default": 5,
-      "pq_supported": 1,
-      "classic": 39,
+      "pq_supported": 0,
+      "classic": 40,
       "unreachable": 0
     },
     {
@@ -187,10 +245,10 @@
     {
       "asn": 16276,
       "org": "OVH",
-      "total": 21,
+      "total": 22,
       "pq_default": 3,
       "pq_supported": 0,
-      "classic": 18,
+      "classic": 19,
       "unreachable": 0
     },
     {
@@ -231,9 +289,9 @@
     }
   ],
   "unreachable_by_error": {
-    "dns": 316,
-    "refused": 49,
-    "timeout": 183,
-    "tls": 28
+    "dns": 305,
+    "refused": 47,
+    "timeout": 192,
+    "tls": 27
   }
 }
