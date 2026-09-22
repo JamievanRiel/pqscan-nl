@@ -31,10 +31,11 @@ func TestBuildSite(t *testing.T) {
 	earlier.TrancoTop = results.Counts{Total: 6, PQDefault: 1, PQSupported: 1, Classic: 3, Unreachable: 1}
 
 	out := t.TempDir()
-	if err := BuildSite(out, []results.Summary{earlier, latest}, recs); err != nil {
+	if err := BuildSite(out, fixtureSectors(t), []results.Summary{earlier, latest}, recs); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"index.html", "search.html", "methodology.html", "findings.html", "style.css", "search.js", "domains.json", "scan-2026-09-28.jsonl.gz"} {
+	for _, name := range []string{"index.html", "search.html", "methodology.html", "findings.html", "style.css", "search.js", "domains.json", "scan-2026-09-28.jsonl.gz",
+		"sectors/banks.csv", "sectors/government.csv", "summaries/2026-09-21.json", "summaries/2026-09-28.json"} {
 		if _, err := os.Stat(filepath.Join(out, name)); err != nil {
 			t.Errorf("missing %s: %v", name, err)
 		}
@@ -66,7 +67,7 @@ func TestBuildSite(t *testing.T) {
 	if err := json.Unmarshal(b, &idx); err != nil {
 		t.Fatal(err)
 	}
-	if idx.Date != "2026-09-28" || len(idx.Domains) != len(recs) || idx.Domains[0].D != "a.nl" || idx.Domains[0].S != "pq-default" || idx.Domains[0].P != "CLOUDFLARENET" {
+	if idx.Date != "2026-09-28" || len(idx.Domains) != len(recs) || idx.Domains[0].D != "a.nl" || idx.Domains[0].S != "pq-default" || idx.Domains[0].P != "Cloudflare" {
 		t.Fatalf("unexpected domains.json: %s", b)
 	}
 	if strings.Contains(string(b), `"h":""`) {
@@ -95,7 +96,7 @@ func TestBuildSite(t *testing.T) {
 func TestBuildSiteLinks(t *testing.T) {
 	recs := fixtureRecords()
 	out := t.TempDir()
-	if err := BuildSite(out, []results.Summary{Summarize(recs, "64X5X", 20)}, recs); err != nil {
+	if err := BuildSite(out, fixtureSectors(t), []results.Summary{Summarize(recs, "64X5X", 20)}, recs); err != nil {
 		t.Fatal(err)
 	}
 	for _, page := range pages {
@@ -121,8 +122,39 @@ func TestBuildSiteLinks(t *testing.T) {
 }
 
 func TestBuildSiteNeedsSummaries(t *testing.T) {
-	if err := BuildSite(t.TempDir(), nil, nil); err == nil {
+	if err := BuildSite(t.TempDir(), t.TempDir(), nil, nil); err == nil {
 		t.Fatal("expected an error without summaries")
+	}
+}
+
+func TestBuildSiteNeedsSectorLists(t *testing.T) {
+	recs := fixtureRecords()
+	err := BuildSite(t.TempDir(), t.TempDir(), []results.Summary{Summarize(recs, "64X5X", 20)}, recs)
+	if err == nil || !strings.Contains(err.Error(), "no sector CSV files") {
+		t.Fatalf("err = %v, want an error about missing sector lists", err)
+	}
+}
+
+// fixtureSectors writes two sector lists and returns their directory.
+func fixtureSectors(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	for name, body := range map[string]string{
+		"banks.csv":      "domain,name,source\nc.nl,C Bank,https://example.org/banks\nbank.nl,Bank,https://example.org/banks\n",
+		"government.csv": "domain,name,source\ngemeente.nl,Gemeente,https://example.org/gov\n",
+	} {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return dir
+}
+
+func TestHumanSize(t *testing.T) {
+	for n, want := range map[int64]string{900: "900 B", 1635: "1.6 KB", 673389: "658 KB", 1628541: "1.6 MB"} {
+		if got := humanSize(n); got != want {
+			t.Errorf("humanSize(%d) = %q, want %q", n, got, want)
+		}
 	}
 }
 

@@ -79,16 +79,48 @@ var funcs = template.FuncMap{
 	"num": thousands,
 }
 
-// BuildSite writes the static website to outDir. summaries must be sorted
-// oldest first and not be empty; latest holds the records of the newest scan.
-func BuildSite(outDir string, summaries []results.Summary, latest []results.Record) error {
+// download is one file on the data page.
+type download struct {
+	Path, Description, Format, Size string
+}
+
+// BuildSite writes the static website to outDir: the pages, the raw results
+// of the latest scan, the domain index, every summary and the sector lists
+// from sectorDir. summaries must be sorted oldest first and not be empty;
+// latest holds the records of the newest scan.
+func BuildSite(outDir, sectorDir string, summaries []results.Summary, latest []results.Record) error {
 	if len(summaries) == 0 {
 		return errors.New("no summaries to build the site from")
 	}
 	if err := os.MkdirAll(outDir, 0o755); err != nil {
 		return err
 	}
-	data := newPageData(summaries)
+	date := summaries[len(summaries)-1].Date
+	raw := "scan-" + date + ".jsonl.gz"
+	if err := writeRawData(filepath.Join(outDir, raw), latest); err != nil {
+		return err
+	}
+	if err := writeDomainIndex(filepath.Join(outDir, "domains.json"), date, latest); err != nil {
+		return err
+	}
+	downloads := []download{
+		{Path: raw, Description: "Raw results of the latest scan, one JSON record per domain", Format: "JSON Lines, gzip", Size: fileSize(filepath.Join(outDir, raw))},
+		{Path: "domains.json", Description: "Latest status per domain, used by the search page", Format: "JSON", Size: fileSize(filepath.Join(outDir, "domains.json"))},
+	}
+	sectors, err := copySectorLists(sectorDir, outDir)
+	if err != nil {
+		return err
+	}
+	downloads = append(downloads, sectors...)
+	for _, s := range slices.Backward(summaries) {
+		path, err := WriteSummary(filepath.Join(outDir, "summaries"), s)
+		if err != nil {
+			return err
+		}
+		downloads = append(downloads, download{Path: "summaries/" + s.Date + ".json", Description: "Summary of the scan of " + s.Date, Format: "JSON", Size: fileSize(path)})
+	}
+
+	data := newPageData(summaries, latest, downloads)
 	for _, page := range pages {
 		b, err := renderPage(page, data)
 		if err != nil {
@@ -107,18 +139,71 @@ func BuildSite(outDir string, summaries []results.Summary, latest []results.Reco
 			return err
 		}
 	}
-	if err := writeDomainIndex(filepath.Join(outDir, "domains.json"), data.Latest.Date, latest); err != nil {
-		return err
-	}
-	return writeRawData(filepath.Join(outDir, "scan-"+data.Latest.Date+".jsonl.gz"), latest)
+	return nil
 }
 
-func newPageData(summaries []results.Summary) pageData {
-	latest := summaries[len(summaries)-1]
+// copySectorLists copies the CSV files in dir to outDir/sectors and describes
+// them for the data page.
+func copySectorLists(dir, outDir string) ([]download, error) {
+	paths, err := filepath.Glob(filepath.Join(dir, "*.csv"))
+	if err != nil {
+		return nil, err
+	}
+	if len(paths) == 0 {
+		return nil, fmt.Errorf("%s: no sector CSV files", dir)
+	}
+	if err := os.MkdirAll(filepath.Join(outDir, "sectors"), 0o755); err != nil {
+		return nil, err
+	}
+	var out []download
+	for _, p := range paths {
+		b, err := os.ReadFile(p)
+		if err != nil {
+			return nil, err
+		}
+		base := filepath.Base(p)
+		if err := os.WriteFile(filepath.Join(outDir, "sectors", base), b, 0o644); err != nil {
+			return nil, err
+		}
+		entries := strings.Count(strings.TrimSpace(string(b)), "\n") // lines after the header
+		out = append(out, download{
+			Path:        "sectors/" + base,
+			Description: fmt.Sprintf("%s sector list, %s entries with their sources", sectorName(strings.TrimSuffix(base, ".csv")), thousands(entries)),
+			Format:      "CSV",
+			Size:        humanSize(int64(len(b))),
+		})
+	}
+	return out, nil
+}
+
+func fileSize(path string) string {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return ""
+	}
+	return humanSize(fi.Size())
+}
+
+// humanSize formats a file size: 900 B, 1.6 KB, 658 KB, 1.6 MB.
+func humanSize(n int64) string {
+	switch f := float64(n); {
+	case n < 1024:
+		return fmt.Sprintf("%d B", n)
+	case n < 10*1024:
+		return fmt.Sprintf("%.1f KB", f/1024)
+	case n < 1024*1024:
+		return fmt.Sprintf("%.0f KB", f/1024)
+	default:
+		return fmt.Sprintf("%.1f MB", f/(1024*1024))
+	}
+}
+
+func newPageData(summaries []results.Summary, latest []results.Record, downloads []download) pageData {
+	last := summaries[len(summaries)-1]
 	d := pageData{
-		Latest:   latest,
-		Tail:     minus(latest.Tranco, latest.TrancoTop),
-		Headline: latest.TrancoTop.Pct(latest.TrancoTop.PQDefault),
+		Latest:   last,
+		Tail:     minus(last.Tranco, last.TrancoTop),
+		Headline: last.TrancoTop.Pct(last.TrancoTop.PQDefault),
 	}
 
 	trend := make([]TrendPoint, len(summaries))
@@ -129,10 +214,10 @@ func newPageData(summaries []results.Summary) pageData {
 
 	d.Sectors = DotPlot(nil)
 
-	for _, p := range latest.Providers {
+	for _, p := range last.Providers {
 		d.Providers = append(d.Providers, providerRow{Org: p.Org, ASN: p.ASN, Reachable: p.Reachable(), PQPct: p.Pct(p.PQDefault)})
 	}
-	d.Causes = describeCauses(latest.UnreachableByError)
+	d.Causes = describeCauses(last.UnreachableByError)
 	return d
 }
 
@@ -180,7 +265,7 @@ func writeDomainIndex(path, date string, recs []results.Record) error {
 		Domains []domainEntry `json:"domains"`
 	}{Date: date, Domains: make([]domainEntry, 0, len(recs))}
 	for _, r := range recs {
-		idx.Domains = append(idx.Domains, domainEntry{Domain: r.Domain, Host: r.Host, Status: string(r.Status), Provider: r.ASOrg})
+		idx.Domains = append(idx.Domains, domainEntry{Domain: r.Domain, Host: r.Host, Status: string(r.Status), Provider: NetworkName(r.ASOrg)})
 	}
 	slices.SortFunc(idx.Domains, func(a, b domainEntry) int { return strings.Compare(a.Domain, b.Domain) })
 	b, err := json.Marshal(idx)

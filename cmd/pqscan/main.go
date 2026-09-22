@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -185,10 +184,7 @@ func runReport(args []string, stdout, stderr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if err := report.BuildSite(*site, all, recs); err != nil {
-		return err
-	}
-	if err := copyCSVFiles(*sectors, filepath.Join(*site, "sectors")); err != nil {
+	if err := report.BuildSite(*site, *sectors, all, recs); err != nil {
 		return err
 	}
 	fmt.Fprintf(stderr, "wrote %s and %s/\n", path, *site)
@@ -237,30 +233,6 @@ func buildRevision(settings []debug.BuildSetting) string {
 		rev += "-dirty"
 	}
 	return rev
-}
-
-// copyCSVFiles copies the .csv files in src to dst.
-func copyCSVFiles(src, dst string) error {
-	paths, err := filepath.Glob(filepath.Join(src, "*.csv"))
-	if err != nil {
-		return err
-	}
-	if len(paths) == 0 {
-		return fmt.Errorf("%s: no CSV files", src)
-	}
-	if err := os.MkdirAll(dst, 0o755); err != nil {
-		return err
-	}
-	for _, p := range paths {
-		b, err := os.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		if err := os.WriteFile(filepath.Join(dst, filepath.Base(p)), b, 0o644); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func writeJSONLFile[T any](path string, items []T) error {
