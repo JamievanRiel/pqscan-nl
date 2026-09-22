@@ -1,14 +1,22 @@
 {
   "date": "2026-09-22",
   "tranco_list_id": "8P4GV",
-  "started_at": "2026-09-22T06:44:55.201654083Z",
-  "finished_at": "2026-09-22T06:49:17.604218707Z",
+  "started_at": "2026-09-22T06:55:05.578346213Z",
+  "finished_at": "2026-09-22T06:58:48.234996615Z",
   "tranco": {
     "total": 19049,
-    "pq_default": 13310,
-    "pq_supported": 7,
-    "classic": 5137,
-    "unreachable": 595
+    "pq_default": 13314,
+    "pq_supported": 6,
+    "classic": 5153,
+    "unreachable": 576
+  },
+  "tranco_top_rank": 250000,
+  "tranco_top": {
+    "total": 1866,
+    "pq_default": 790,
+    "pq_supported": 2,
+    "classic": 962,
+    "unreachable": 112
   },
   "sectors": {
     "banks": {
@@ -20,10 +28,10 @@
     },
     "government": {
       "total": 524,
-      "pq_default": 79,
+      "pq_default": 80,
       "pq_supported": 0,
       "classic": 442,
-      "unreachable": 3
+      "unreachable": 2
     },
     "hospitals": {
       "total": 69,
@@ -44,188 +52,188 @@
     {
       "asn": 13335,
       "org": "CLOUDFLARENET",
-      "total": 11804,
-      "pq_default": 11749,
+      "total": 429,
+      "pq_default": 416,
       "pq_supported": 0,
-      "classic": 55,
+      "classic": 13,
       "unreachable": 0
     },
     {
       "asn": 16509,
       "org": "AMAZON-02",
-      "total": 660,
-      "pq_default": 291,
-      "pq_supported": 1,
-      "classic": 368,
-      "unreachable": 0
-    },
-    {
-      "asn": 20857,
-      "org": "TRANSIP-AS Amsterdam, the Netherlands",
-      "total": 641,
-      "pq_default": 45,
+      "total": 191,
+      "pq_default": 85,
       "pq_supported": 0,
-      "classic": 596,
+      "classic": 106,
       "unreachable": 0
     },
     {
       "asn": 8075,
       "org": "MICROSOFT-CORP-MSN-AS-BLOCK",
-      "total": 393,
-      "pq_default": 26,
-      "pq_supported": 2,
-      "classic": 365,
-      "unreachable": 0
-    },
-    {
-      "asn": 24940,
-      "org": "HETZNER-AS",
-      "total": 352,
-      "pq_default": 99,
-      "pq_supported": 1,
-      "classic": 252,
-      "unreachable": 0
-    },
-    {
-      "asn": 12859,
-      "org": "NL-BIT BIT BV",
-      "total": 242,
-      "pq_default": 29,
+      "total": 107,
+      "pq_default": 10,
       "pq_supported": 0,
-      "classic": 213,
+      "classic": 97,
       "unreachable": 0
     },
     {
-      "asn": 34762,
-      "org": "COMBELL-AS",
-      "total": 232,
-      "pq_default": 23,
+      "asn": 20857,
+      "org": "TRANSIP-AS Amsterdam, the Netherlands",
+      "total": 72,
+      "pq_default": 4,
       "pq_supported": 0,
-      "classic": 209,
-      "unreachable": 0
-    },
-    {
-      "asn": 48635,
-      "org": "CLDIN-NL Your Hosting B.V. part of Your.Online",
-      "total": 222,
-      "pq_default": 31,
-      "pq_supported": 0,
-      "classic": 191,
-      "unreachable": 0
-    },
-    {
-      "asn": 60781,
-      "org": "LEASEWEB-NL-AMS-01 Netherlands",
-      "total": 213,
-      "pq_default": 15,
-      "pq_supported": 0,
-      "classic": 198,
-      "unreachable": 0
-    },
-    {
-      "asn": 20847,
-      "org": "PREVIDER-AS",
-      "total": 179,
-      "pq_default": 47,
-      "pq_supported": 0,
-      "classic": 132,
-      "unreachable": 0
-    },
-    {
-      "asn": 396982,
-      "org": "GOOGLE-CLOUD-PLATFORM",
-      "total": 174,
-      "pq_default": 17,
-      "pq_supported": 0,
-      "classic": 157,
-      "unreachable": 0
-    },
-    {
-      "asn": 14061,
-      "org": "DIGITALOCEAN-ASN",
-      "total": 139,
-      "pq_default": 21,
-      "pq_supported": 0,
-      "classic": 118,
-      "unreachable": 0
-    },
-    {
-      "asn": 15703,
-      "org": "TRUESERVER-AS TrueServer BV AS number",
-      "total": 129,
-      "pq_default": 9,
-      "pq_supported": 0,
-      "classic": 120,
-      "unreachable": 0
-    },
-    {
-      "asn": 16276,
-      "org": "OVH",
-      "total": 123,
-      "pq_default": 15,
-      "pq_supported": 0,
-      "classic": 108,
+      "classic": 68,
       "unreachable": 0
     },
     {
       "asn": 20940,
       "org": "AKAMAI-ASN1",
-      "total": 111,
-      "pq_default": 100,
+      "total": 70,
+      "pq_default": 67,
       "pq_supported": 0,
-      "classic": 11,
+      "classic": 3,
       "unreachable": 0
     },
     {
-      "asn": 31477,
-      "org": "DUOCAST-AS",
-      "total": 93,
-      "pq_default": 62,
+      "asn": 24940,
+      "org": "HETZNER-AS",
+      "total": 58,
+      "pq_default": 28,
       "pq_supported": 0,
-      "classic": 31,
+      "classic": 30,
       "unreachable": 0
     },
     {
-      "asn": 25459,
-      "org": "NEDZONE-AS",
-      "total": 92,
+      "asn": 396982,
+      "org": "GOOGLE-CLOUD-PLATFORM",
+      "total": 45,
       "pq_default": 5,
+      "pq_supported": 1,
+      "classic": 39,
+      "unreachable": 0
+    },
+    {
+      "asn": 60781,
+      "org": "LEASEWEB-NL-AMS-01 Netherlands",
+      "total": 42,
+      "pq_default": 4,
       "pq_supported": 0,
-      "classic": 87,
+      "classic": 38,
       "unreachable": 0
     },
     {
       "asn": 1103,
       "org": "SURFNET-NL SURFnet, The Netherlands",
-      "total": 82,
-      "pq_default": 7,
+      "total": 39,
+      "pq_default": 2,
       "pq_supported": 0,
-      "classic": 75,
+      "classic": 37,
+      "unreachable": 0
+    },
+    {
+      "asn": 12859,
+      "org": "NL-BIT BIT BV",
+      "total": 34,
+      "pq_default": 5,
+      "pq_supported": 0,
+      "classic": 29,
+      "unreachable": 0
+    },
+    {
+      "asn": 41887,
+      "org": "PROLOCATION Prolocation",
+      "total": 29,
+      "pq_default": 2,
+      "pq_supported": 0,
+      "classic": 27,
+      "unreachable": 0
+    },
+    {
+      "asn": 15703,
+      "org": "TRUESERVER-AS TrueServer BV AS number",
+      "total": 26,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 26,
+      "unreachable": 0
+    },
+    {
+      "asn": 34762,
+      "org": "COMBELL-AS",
+      "total": 26,
+      "pq_default": 10,
+      "pq_supported": 0,
+      "classic": 16,
+      "unreachable": 0
+    },
+    {
+      "asn": 48635,
+      "org": "CLDIN-NL Your Hosting B.V. part of Your.Online",
+      "total": 23,
+      "pq_default": 4,
+      "pq_supported": 0,
+      "classic": 19,
       "unreachable": 0
     },
     {
       "asn": 54113,
       "org": "FASTLY",
-      "total": 79,
-      "pq_default": 75,
+      "total": 23,
+      "pq_default": 22,
       "pq_supported": 0,
-      "classic": 4,
+      "classic": 1,
+      "unreachable": 0
+    },
+    {
+      "asn": 16276,
+      "org": "OVH",
+      "total": 21,
+      "pq_default": 3,
+      "pq_supported": 0,
+      "classic": 18,
+      "unreachable": 0
+    },
+    {
+      "asn": 20847,
+      "org": "PREVIDER-AS",
+      "total": 21,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 21,
+      "unreachable": 0
+    },
+    {
+      "asn": 14061,
+      "org": "DIGITALOCEAN-ASN",
+      "total": 18,
+      "pq_default": 3,
+      "pq_supported": 0,
+      "classic": 15,
       "unreachable": 0
     },
     {
       "asn": 29550,
       "org": "SIMPLYTRANSIT",
-      "total": 78,
+      "total": 17,
       "pq_default": 0,
       "pq_supported": 0,
-      "classic": 78,
+      "classic": 17,
+      "unreachable": 0
+    },
+    {
+      "asn": 31477,
+      "org": "DUOCAST-AS",
+      "total": 15,
+      "pq_default": 6,
+      "pq_supported": 0,
+      "classic": 9,
       "unreachable": 0
     }
   ],
   "unreachable_by_error": {
-    "dns": 306,
-    "refused": 48,
-    "timeout": 213,
+    "dns": 316,
+    "refused": 49,
+    "timeout": 183,
     "tls": 28
   }
 }
