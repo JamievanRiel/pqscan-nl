@@ -3,21 +3,19 @@ package report
 import (
 	"strings"
 	"testing"
-
-	"github.com/JamievanRiel/pqscan-nl/internal/results"
 )
 
 func TestTrendSVG(t *testing.T) {
 	if TrendSVG(nil) != "" {
 		t.Error("no points must draw nothing")
 	}
-	one := string(TrendSVG([]TrendPoint{{Date: "2026-09-28", Pct: 40}}))
-	if strings.Contains(one, "<polyline") || strings.Count(one, "<circle") != 1 {
-		t.Errorf("one point should be a single dot without a line: %s", one)
+	one := string(TrendSVG([]TrendPoint{{Date: "2026-09-28", Pct: 40, Lo: 30, Hi: 50}}))
+	if strings.Contains(one, "<polyline") || strings.Contains(one, `class="band"`) || strings.Count(one, `class="dot"`) != 1 || !strings.Contains(one, `class="whisker"`) {
+		t.Errorf("one point should be a dot with a whisker, without line or band: %s", one)
 	}
-	two := string(TrendSVG([]TrendPoint{{Date: "2026-09-21", Pct: 20}, {Date: "2026-09-28", Pct: 40}}))
-	for _, want := range []string{"<polyline", "2026-09-21: 20.0%", "2026-09-28: 40.0%", ">100%<", ">0%<",
-		`x1="64"`, "latest scan 2026-09-28: 40.0%"} {
+	two := string(TrendSVG([]TrendPoint{{Date: "2026-09-21", Pct: 20, Lo: 15, Hi: 25}, {Date: "2026-09-28", Pct: 40, Lo: 35, Hi: 45}}))
+	for _, want := range []string{"<polyline", `<polygon class="band"`, "2026-09-21: 20.0% (95% CI 15.0–25.0%)", "2026-09-28: 40.0%", ">100%<", ">0%<",
+		`x1="64"`, "latest scan 2026-09-28: 40.0%", `class="hit"`} {
 		if !strings.Contains(two, want) {
 			t.Errorf("trend chart lacks %q: %s", want, two)
 		}
@@ -31,35 +29,51 @@ func TestTrendSVG(t *testing.T) {
 	}
 }
 
-func TestSectorBars(t *testing.T) {
-	if SectorBars(nil) != "" {
+func TestDotPlot(t *testing.T) {
+	if DotPlot(nil) != "" {
 		t.Error("no rows must draw nothing")
 	}
-	html := string(SectorBars([]BarRow{
-		{Label: "A&B", Counts: results.Counts{Total: 5, PQDefault: 2, PQSupported: 1, Classic: 1, Unreachable: 1}},
-		{Label: "None", Counts: results.Counts{Total: 1, Unreachable: 1}},
+	html := string(DotPlot([]DotRow{
+		{Label: "A&B", N: 1752, Est: 45.1, Lo: 42.7, Hi: 47.4},
+		{Label: "None"},
+		{Label: "Tail", N: 20, Est: 75, Lo: 53.1, Hi: 88.8, Muted: true},
 	}))
-	// Bars are 100 units wide, so x and width are percentages of the 4 reachable domains.
 	for _, want := range []string{
-		`<span class="bar-label">A&amp;B</span>`,
-		`viewBox="0 0 100 10" preserveAspectRatio="none"`,
-		`aria-label="A&amp;B: 50% post-quantum by default, 25% supported, 25% classic only"`,
-		`<rect class="seg-pq" x="0.0" y="0" width="50.0" height="10">`,
-		`<rect class="seg-sup" x="50.0" y="0" width="25.0" height="10">`,
-		`<rect class="seg-classic" x="75.0" y="0" width="25.0" height="10">`,
-		"A&amp;B, post-quantum by default: 2 of 4 (50.0%)",
-		`<span class="bar-value">50%</span>`,
-		`aria-label="None: no reachable domains"`,
-		`<span class="bar-value">–</span>`,
+		`<span class="sr">A&amp;B: 45.1% (95% CI 42.7–47.4%), n = 1,752</span>`,
+		`title="A&amp;B: 45.1% (95% CI 42.7–47.4%), n = 1,752"`,
+		`<span class="dp-label" aria-hidden="true">A&amp;B <span class="dp-n">n&nbsp;=&nbsp;1,752</span></span>`,
+		`<span class="dp-ci" style="left:42.7%;width:4.7%"></span><span class="dp-dot" style="left:45.1%"></span>`,
+		`<span class="dp-value" aria-hidden="true">45.1%</span>`,
+		`<span class="sr">None: no reachable domains</span>`,
+		`<span class="dp-value" aria-hidden="true">–</span>`,
+		`<div class="dp-sep" role="presentation"></div><div class="dp-row muted" role="listitem"`,
+		`<span style="left:50%">50%</span>`,
 	} {
 		if !strings.Contains(html, want) {
-			t.Errorf("sector bars lack %q: %s", want, html)
+			t.Errorf("dot plot lacks %q: %s", want, html)
 		}
 	}
 	if strings.Contains(html, "A&B") {
 		t.Error("labels must be escaped")
 	}
-	if strings.Count(html, `class="bar-row"`) != 2 {
-		t.Errorf("want one bar-row per row: %s", html)
+	if strings.Count(html, "dp-sep") != 1 {
+		t.Error("only the first muted row after a normal one gets a separator")
+	}
+}
+
+func TestWaffle(t *testing.T) {
+	if Waffle(nil, 60) != "" {
+		t.Error("no cells must draw nothing")
+	}
+	svg := string(Waffle([]bool{true, false, true, false, false}, 3))
+	for _, want := range []string{
+		`viewBox="0 0 28 18"`,
+		`aria-label="5 squares, one per reachable domain in order of Tranco rank; 2 are post-quantum by default"`,
+		`<path class="w-pq" d="M0 0h8v8h-8zM20 0h8v8h-8z"><title>2 domains post-quantum by default</title></path>`,
+		`<path class="w-other" d="M10 0h8v8h-8zM0 10h8v8h-8zM10 10h8v8h-8z"><title>3 domains not post-quantum by default</title></path>`,
+	} {
+		if !strings.Contains(svg, want) {
+			t.Errorf("waffle lacks %q: %s", want, svg)
+		}
 	}
 }

@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"html/template"
 	"strings"
-
-	"github.com/JamievanRiel/pqscan-nl/internal/results"
 )
 
-// TrendPoint is one scan on the trend chart.
+// TrendPoint is one scan on the trend chart; Lo and Hi bound its 95% interval.
 type TrendPoint struct {
-	Date string
-	Pct  float64
+	Date        string
+	Pct, Lo, Hi float64
 }
 
-// TrendSVG draws the share of pq-default domains per scan on a fixed 0–100% axis.
-// Date labels between the first and the last have class "mid", so the
-// stylesheet can hide them on narrow screens where the text is enlarged.
+// TrendSVG draws the share of pq-default domains per scan on a fixed 0–100%
+// axis, with the 95% interval as a band (a whisker for a single scan). Date
+// labels between the first and the last have class "mid", so the stylesheet
+// can hide them on narrow screens where the text is enlarged.
 func TrendSVG(points []TrendPoint) template.HTML {
 	if len(points) == 0 {
 		return ""
@@ -40,15 +39,25 @@ func TrendSVG(points []TrendPoint) template.HTML {
 		fmt.Fprintf(&b, `<text class="tick" x="%g" y="%.1f" text-anchor="end" dominant-baseline="middle">%g%%</text>`, left-6, y(g), g)
 	}
 	if len(points) > 1 {
+		band := make([]string, 0, 2*len(points))
+		for i, p := range points {
+			band = append(band, fmt.Sprintf("%.1f,%.1f", x(i), y(p.Hi)))
+		}
+		for i := len(points) - 1; i >= 0; i-- {
+			band = append(band, fmt.Sprintf("%.1f,%.1f", x(i), y(points[i].Lo)))
+		}
+		fmt.Fprintf(&b, `<polygon class="band" points="%s"/>`, strings.Join(band, " "))
 		coords := make([]string, len(points))
 		for i, p := range points {
 			coords[i] = fmt.Sprintf("%.1f,%.1f", x(i), y(p.Pct))
 		}
 		fmt.Fprintf(&b, `<polyline class="line" points="%s"/>`, strings.Join(coords, " "))
+	} else {
+		fmt.Fprintf(&b, `<line class="whisker" x1="%.1f" x2="%.1f" y1="%.1f" y2="%.1f"/>`, x(0), x(0), y(latest.Lo), y(latest.Hi))
 	}
 	for i, p := range points {
-		fmt.Fprintf(&b, `<circle class="dot" cx="%.1f" cy="%.1f" r="4"><title>%s: %.1f%%</title></circle>`,
-			x(i), y(p.Pct), template.HTMLEscapeString(p.Date), p.Pct)
+		fmt.Fprintf(&b, `<g class="pt"><circle class="hit" cx="%.1f" cy="%.1f" r="12"/><circle class="dot" cx="%.1f" cy="%.1f" r="4"/><title>%s: %.1f%% (95%% CI %.1f–%.1f%%)</title></g>`,
+			x(i), y(p.Pct), x(i), y(p.Pct), template.HTMLEscapeString(p.Date), p.Pct, p.Lo, p.Hi)
 	}
 	// Date labels: every scan while there are few, otherwise the first and last.
 	for i, p := range points {
@@ -72,53 +81,78 @@ func TrendSVG(points []TrendPoint) template.HTML {
 	return template.HTML(b.String())
 }
 
-// BarRow is one bar: a label and its counts.
-type BarRow struct {
-	Label  string
-	Counts results.Counts
+// DotRow is one estimate on a dot plot. Est, Lo and Hi are percentages.
+type DotRow struct {
+	Label       string
+	N           int // reachable domains behind the estimate
+	Est, Lo, Hi float64
+	Muted       bool // a comparison row outside the main population
 }
 
-// SectorBars draws one row per BarRow: the label and the pq-default share as
-// HTML text, and between them a bar split into the pq-default, pq-supported
-// and classic shares of the reachable domains. Keeping the text out of the
-// SVG lets it wrap and stay legible on narrow screens.
-func SectorBars(rows []BarRow) template.HTML {
+// DotPlot draws estimates with their 95% intervals on a shared 0–100% axis.
+// Labels, n and values are HTML so they wrap on narrow screens; the whisker
+// and the dot are positioned in percent so the dot stays round at any width.
+// A separator precedes the first muted row that follows a normal one.
+func DotPlot(rows []DotRow) template.HTML {
 	if len(rows) == 0 {
 		return ""
 	}
 	var b strings.Builder
-	b.WriteString(`<div class="bars">`)
-	for _, r := range rows {
-		c := r.Counts
+	b.WriteString(`<div class="dotplot" role="list">`)
+	for i, r := range rows {
+		if r.Muted && i > 0 && !rows[i-1].Muted {
+			b.WriteString(`<div class="dp-sep" role="presentation"></div>`)
+		}
 		label := template.HTMLEscapeString(r.Label)
-		desc := fmt.Sprintf("%s: %.0f%% post-quantum by default, %.0f%% supported, %.0f%% classic only",
-			label, c.Pct(c.PQDefault), c.Pct(c.PQSupported), c.Pct(c.Classic))
-		value := fmt.Sprintf("%.0f%%", c.Pct(c.PQDefault))
-		if c.Reachable() == 0 {
-			desc = label + ": no reachable domains"
-			value = "–"
+		desc := fmt.Sprintf("%s: %.1f%% (95%% CI %.1f–%.1f%%), n = %s", label, r.Est, r.Lo, r.Hi, thousands(r.N))
+		plot := fmt.Sprintf(`<span class="dp-ci" style="left:%.1f%%;width:%.1f%%"></span><span class="dp-dot" style="left:%.1f%%"></span>`, r.Lo, r.Hi-r.Lo, r.Est)
+		value := fmt.Sprintf("%.1f%%", r.Est)
+		if r.N == 0 {
+			desc, plot, value = label+": no reachable domains", "", "–"
 		}
-		fmt.Fprintf(&b, `<div class="bar-row"><span class="bar-label">%s</span>`, label)
-		fmt.Fprintf(&b, `<svg class="bar" viewBox="0 0 100 10" preserveAspectRatio="none" role="img" aria-label="%s">`, desc)
-		x := 0.0
-		for _, seg := range []struct {
-			class, name string
-			n           int
-		}{
-			{"seg-pq", "post-quantum by default", c.PQDefault},
-			{"seg-sup", "supported, not default", c.PQSupported},
-			{"seg-classic", "classic only", c.Classic},
-		} {
-			if seg.n == 0 {
-				continue
-			}
-			w := c.Pct(seg.n)
-			fmt.Fprintf(&b, `<rect class="%s" x="%.1f" y="0" width="%.1f" height="10"><title>%s, %s: %d of %d (%.1f%%)</title></rect>`,
-				seg.class, x, w, label, seg.name, seg.n, c.Reachable(), w)
-			x += w
+		class := "dp-row"
+		if r.Muted {
+			class += " muted"
 		}
-		fmt.Fprintf(&b, `</svg><span class="bar-value">%s</span></div>`, value)
+		fmt.Fprintf(&b, `<div class="%s" role="listitem" title="%s"><span class="sr">%s</span>`, class, desc, desc)
+		fmt.Fprintf(&b, `<span class="dp-label" aria-hidden="true">%s <span class="dp-n">n&nbsp;=&nbsp;%s</span></span>`, label, thousands(r.N))
+		fmt.Fprintf(&b, `<span class="dp-plot" aria-hidden="true">%s</span><span class="dp-value" aria-hidden="true">%s</span></div>`, plot, value)
 	}
-	b.WriteString(`</div>`)
+	b.WriteString(`<div class="dp-axis" aria-hidden="true"><span></span><span class="dp-ticks">`)
+	for _, t := range []int{0, 25, 50, 75, 100} {
+		fmt.Fprintf(&b, `<span style="left:%d%%">%d%%</span>`, t, t)
+	}
+	b.WriteString(`</span><span></span></div></div>`)
+	return template.HTML(b.String())
+}
+
+// Waffle draws one square per domain, cols to a row, in the order given: the
+// most popular domain at the top left. Filled squares are post-quantum by
+// default. Each group is one path, which keeps thousands of squares small.
+func Waffle(pq []bool, cols int) template.HTML {
+	if len(pq) == 0 || cols <= 0 {
+		return ""
+	}
+	const cell, pitch = 8, 10 // the 2-unit gap separates squares in the surface colour
+	var on, off strings.Builder
+	n := 0
+	for i, v := range pq {
+		p := &off
+		if v {
+			p, n = &on, n+1
+		}
+		fmt.Fprintf(p, "M%d %dh%dv%dh-%dz", i%cols*pitch, i/cols*pitch, cell, cell, cell)
+	}
+	rows := (len(pq) + cols - 1) / cols
+	var b strings.Builder
+	fmt.Fprintf(&b, `<svg class="waffle" viewBox="0 0 %d %d" role="img" aria-label="%s squares, one per reachable domain in order of Tranco rank; %s are post-quantum by default">`,
+		cols*pitch-(pitch-cell), rows*pitch-(pitch-cell), thousands(len(pq)), thousands(n))
+	if n > 0 {
+		fmt.Fprintf(&b, `<path class="w-pq" d="%s"><title>%s domains post-quantum by default</title></path>`, on.String(), thousands(n))
+	}
+	if n < len(pq) {
+		fmt.Fprintf(&b, `<path class="w-other" d="%s"><title>%s domains not post-quantum by default</title></path>`, off.String(), thousands(len(pq)-n))
+	}
+	b.WriteString(`</svg>`)
 	return template.HTML(b.String())
 }

@@ -127,15 +127,7 @@ func newPageData(summaries []results.Summary) pageData {
 	}
 	d.Trend = TrendSVG(trend)
 
-	top := strconv.Itoa(latest.TrancoTopRank/1000) + "k"
-	rows := []BarRow{
-		{Label: "Tranco top " + top, Counts: latest.TrancoTop},
-		{Label: "Tranco " + top + "–1M", Counts: d.Tail},
-	}
-	for _, name := range slices.Sorted(maps.Keys(latest.Sectors)) {
-		rows = append(rows, BarRow{Label: sectorName(name), Counts: latest.Sectors[name]})
-	}
-	d.Sectors = SectorBars(rows)
+	d.Sectors = DotPlot(nil)
 
 	for _, p := range latest.Providers {
 		d.Providers = append(d.Providers, providerRow{Org: p.Org, ASN: p.ASN, Reachable: p.Reachable(), PQPct: p.Pct(p.PQDefault)})
