@@ -1,0 +1,231 @@
+{
+  "date": "2026-09-22",
+  "tranco_list_id": "8P4GV",
+  "started_at": "2026-09-22T06:34:51.678453059Z",
+  "finished_at": "2026-09-22T06:38:53.806554971Z",
+  "tranco": {
+    "total": 19049,
+    "pq_default": 13310,
+    "pq_supported": 5,
+    "classic": 5140,
+    "unreachable": 594
+  },
+  "sectors": {
+    "banks": {
+      "total": 27,
+      "pq_default": 17,
+      "pq_supported": 0,
+      "classic": 10,
+      "unreachable": 0
+    },
+    "government": {
+      "total": 524,
+      "pq_default": 79,
+      "pq_supported": 0,
+      "classic": 443,
+      "unreachable": 2
+    },
+    "hospitals": {
+      "total": 69,
+      "pq_default": 13,
+      "pq_supported": 0,
+      "classic": 56,
+      "unreachable": 0
+    },
+    "webshops": {
+      "total": 32,
+      "pq_default": 22,
+      "pq_supported": 0,
+      "classic": 10,
+      "unreachable": 0
+    }
+  },
+  "providers": [
+    {
+      "asn": 13335,
+      "org": "CLOUDFLARENET",
+      "total": 11804,
+      "pq_default": 11749,
+      "pq_supported": 0,
+      "classic": 55,
+      "unreachable": 0
+    },
+    {
+      "asn": 16509,
+      "org": "AMAZON-02",
+      "total": 656,
+      "pq_default": 291,
+      "pq_supported": 0,
+      "classic": 365,
+      "unreachable": 0
+    },
+    {
+      "asn": 20857,
+      "org": "TRANSIP-AS Amsterdam, the Netherlands",
+      "total": 639,
+      "pq_default": 45,
+      "pq_supported": 0,
+      "classic": 594,
+      "unreachable": 0
+    },
+    {
+      "asn": 8075,
+      "org": "MICROSOFT-CORP-MSN-AS-BLOCK",
+      "total": 393,
+      "pq_default": 25,
+      "pq_supported": 1,
+      "classic": 367,
+      "unreachable": 0
+    },
+    {
+      "asn": 24940,
+      "org": "HETZNER-AS",
+      "total": 353,
+      "pq_default": 100,
+      "pq_supported": 1,
+      "classic": 252,
+      "unreachable": 0
+    },
+    {
+      "asn": 12859,
+      "org": "NL-BIT BIT BV",
+      "total": 242,
+      "pq_default": 29,
+      "pq_supported": 0,
+      "classic": 213,
+      "unreachable": 0
+    },
+    {
+      "asn": 34762,
+      "org": "COMBELL-AS",
+      "total": 232,
+      "pq_default": 23,
+      "pq_supported": 0,
+      "classic": 209,
+      "unreachable": 0
+    },
+    {
+      "asn": 48635,
+      "org": "CLDIN-NL Your Hosting B.V. part of Your.Online",
+      "total": 222,
+      "pq_default": 31,
+      "pq_supported": 0,
+      "classic": 191,
+      "unreachable": 0
+    },
+    {
+      "asn": 60781,
+      "org": "LEASEWEB-NL-AMS-01 Netherlands",
+      "total": 210,
+      "pq_default": 15,
+      "pq_supported": 0,
+      "classic": 195,
+      "unreachable": 0
+    },
+    {
+      "asn": 20847,
+      "org": "PREVIDER-AS",
+      "total": 179,
+      "pq_default": 47,
+      "pq_supported": 0,
+      "classic": 132,
+      "unreachable": 0
+    },
+    {
+      "asn": 396982,
+      "org": "GOOGLE-CLOUD-PLATFORM",
+      "total": 174,
+      "pq_default": 16,
+      "pq_supported": 1,
+      "classic": 157,
+      "unreachable": 0
+    },
+    {
+      "asn": 14061,
+      "org": "DIGITALOCEAN-ASN",
+      "total": 139,
+      "pq_default": 21,
+      "pq_supported": 0,
+      "classic": 118,
+      "unreachable": 0
+    },
+    {
+      "asn": 15703,
+      "org": "TRUESERVER-AS TrueServer BV AS number",
+      "total": 129,
+      "pq_default": 9,
+      "pq_supported": 0,
+      "classic": 120,
+      "unreachable": 0
+    },
+    {
+      "asn": 16276,
+      "org": "OVH",
+      "total": 123,
+      "pq_default": 15,
+      "pq_supported": 0,
+      "classic": 108,
+      "unreachable": 0
+    },
+    {
+      "asn": 20940,
+      "org": "AKAMAI-ASN1",
+      "total": 111,
+      "pq_default": 100,
+      "pq_supported": 0,
+      "classic": 11,
+      "unreachable": 0
+    },
+    {
+      "asn": 25459,
+      "org": "NEDZONE-AS",
+      "total": 93,
+      "pq_default": 5,
+      "pq_supported": 0,
+      "classic": 88,
+      "unreachable": 0
+    },
+    {
+      "asn": 31477,
+      "org": "DUOCAST-AS",
+      "total": 93,
+      "pq_default": 62,
+      "pq_supported": 0,
+      "classic": 31,
+      "unreachable": 0
+    },
+    {
+      "asn": 1103,
+      "org": "SURFNET-NL SURFnet, The Netherlands",
+      "total": 80,
+      "pq_default": 7,
+      "pq_supported": 0,
+      "classic": 73,
+      "unreachable": 0
+    },
+    {
+      "asn": 54113,
+      "org": "FASTLY",
+      "total": 79,
+      "pq_default": 75,
+      "pq_supported": 0,
+      "classic": 4,
+      "unreachable": 0
+    },
+    {
+      "asn": 29550,
+      "org": "SIMPLYTRANSIT",
+      "total": 78,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 78,
+      "unreachable": 0
+    }
+  ],
+  "unreachable_by_error": {
+    "dns": 305,
+    "refused": 50,
+    "timeout": 208,
+    "tls": 31
+  }
+}
