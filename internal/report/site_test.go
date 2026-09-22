@@ -2,6 +2,7 @@ package report
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"flag"
 	"os"
@@ -33,7 +34,7 @@ func TestBuildSite(t *testing.T) {
 	if err := BuildSite(out, []results.Summary{earlier, latest}, recs); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"index.html", "search.html", "methodology.html", "findings.html", "style.css", "search.js", "domains.json"} {
+	for _, name := range []string{"index.html", "search.html", "methodology.html", "findings.html", "style.css", "search.js", "domains.json", "scan-2026-09-28.jsonl.gz"} {
 		if _, err := os.Stat(filepath.Join(out, name)); err != nil {
 			t.Errorf("missing %s: %v", name, err)
 		}
@@ -70,6 +71,52 @@ func TestBuildSite(t *testing.T) {
 	}
 	if strings.Contains(string(b), `"h":""`) {
 		t.Error("empty host must be omitted")
+	}
+
+	f, err := os.Open(filepath.Join(out, "scan-2026-09-28.jsonl.gz"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	zr, err := gzip.NewReader(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := results.ReadJSONL[results.Record](zr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(raw) != len(recs) || raw[0].Domain != recs[0].Domain || raw[0].Status != recs[0].Status {
+		t.Fatalf("raw data holds %+v, want the scan records", raw)
+	}
+}
+
+// The repository is private, so the public site must not link into it.
+func TestBuildSiteLinks(t *testing.T) {
+	recs := fixtureRecords()
+	out := t.TempDir()
+	if err := BuildSite(out, []results.Summary{Summarize(recs, "64X5X", 20)}, recs); err != nil {
+		t.Fatal(err)
+	}
+	for _, page := range pages {
+		b, err := os.ReadFile(filepath.Join(out, page+".html"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, bad := range []string{`github.com/JamievanRiel/pqscan-nl"`, "github.com/JamievanRiel/pqscan-nl/"} {
+			if bytes.Contains(b, []byte(bad)) {
+				t.Errorf("%s.html links to the private repository (%s)", page, bad)
+			}
+		}
+		if !bytes.Contains(b, []byte(`href="scan-2026-09-28.jsonl.gz"`)) {
+			t.Errorf("%s.html lacks a link to the raw data", page)
+		}
+	}
+	methodology, _ := os.ReadFile(filepath.Join(out, "methodology.html"))
+	for _, want := range []string{"github.com/JamievanRiel/pqscan-nl-optout/issues/new", `href="sectors/banks.csv"`, `href="sectors/government.csv"`} {
+		if !bytes.Contains(methodology, []byte(want)) {
+			t.Errorf("methodology.html lacks %q", want)
+		}
 	}
 }
 

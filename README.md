@@ -44,11 +44,12 @@ flowchart LR
 
 A [GitHub Actions workflow](.github/workflows/scan.yml) runs the pipeline weekly. The scanner is plain Go with no dependencies outside the standard library.
 
+This repository is private. The site, the raw results of the latest scan, the sector lists and the [opt-out repository](https://github.com/JamievanRiel/pqscan-nl-optout) are public.
+
 ## Try it
 
 ```sh
-go install github.com/JamievanRiel/pqscan-nl/cmd/pqscan@latest
-pqscan check rijksoverheid.nl nu.nl
+go run ./cmd/pqscan check rijksoverheid.nl nu.nl
 ```
 
 Run the full pipeline locally:
@@ -66,13 +67,13 @@ python3 -m http.server -d site
 
 ## Data
 
-- **Raw results:** one JSON record per domain, attached to each [release](https://github.com/JamievanRiel/pqscan-nl/releases). `cert_valid` is `true` or `false` when a handshake completed (whether the certificate verifies against the system roots, which does not affect the status) and absent for unreachable domains.
+- **Raw results:** one JSON record per domain, attached to each [release](https://github.com/JamievanRiel/pqscan-nl/releases). The latest scan is also published on the site as `scan-YYYY-MM-DD.jsonl.gz`, linked from every page. `cert_valid` is `true` or `false` when a handshake completed (whether the certificate verifies against the system roots, which does not affect the status) and absent for unreachable domains.
 - **Summaries:** counts per status, sector and hosting network in [`data/summaries`](data/summaries).
-- **Sector lists:** [`lists/sectors`](lists/sectors), every entry with its source. The government list is generated from the [Organisaties overheid](https://organisaties.overheid.nl/) register with `go run ./tools/govlist`, which also merges the hand-maintained entries in [`lists/government-extra.csv`](lists/government-extra.csv).
+- **Sector lists:** [`lists/sectors`](lists/sectors), every entry with its source, published on the site under `sectors/`. The government list is generated from the [Organisaties overheid](https://organisaties.overheid.nl/) register with `go run ./tools/govlist`, which also merges the hand-maintained entries in [`lists/government-extra.csv`](lists/government-extra.csv).
 
 ## Opting out
 
-To exclude a domain from future scans, [open an issue](https://github.com/JamievanRiel/pqscan-nl/issues). It will be added to [`lists/exclude.txt`](lists/exclude.txt).
+Because this repository is private, opt-out requests arrive as issues in the public [pqscan-nl-optout](https://github.com/JamievanRiel/pqscan-nl-optout/issues) repository, which the site links to. Add the domain to [`lists/exclude.txt`](lists/exclude.txt) and close the issue.
 
 ## Related
 

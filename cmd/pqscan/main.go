@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -153,6 +154,7 @@ func runReport(args []string, stdout, stderr io.Writer) error {
 	scan := fs.String("scan", "scan.jsonl", "records from pqscan scan")
 	trancoID := fs.String("tranco-id", "", "Tranco list ID used for this scan (required)")
 	summaries := fs.String("summaries", "data/summaries", "directory of per-scan summaries")
+	sectors := fs.String("sectors", "lists/sectors", "directory of sector CSV files to publish with the site")
 	site := fs.String("site", "site", "output directory for the website")
 	top := fs.Int("providers", 20, "number of hosting networks in the summary")
 	if err := fs.Parse(args); err != nil {
@@ -182,6 +184,9 @@ func runReport(args []string, stdout, stderr io.Writer) error {
 	if err := report.BuildSite(*site, all, recs); err != nil {
 		return err
 	}
+	if err := copyCSVFiles(*sectors, filepath.Join(*site, "sectors")); err != nil {
+		return err
+	}
 	fmt.Fprintf(stderr, "wrote %s and %s/\n", path, *site)
 	fmt.Fprintln(stdout, s.Date)
 	return nil
@@ -208,6 +213,30 @@ func describe(r results.Record) string {
 		s += ", supports " + r.PQGroup
 	}
 	return s
+}
+
+// copyCSVFiles copies the .csv files in src to dst.
+func copyCSVFiles(src, dst string) error {
+	paths, err := filepath.Glob(filepath.Join(src, "*.csv"))
+	if err != nil {
+		return err
+	}
+	if len(paths) == 0 {
+		return fmt.Errorf("%s: no CSV files", src)
+	}
+	if err := os.MkdirAll(dst, 0o755); err != nil {
+		return err
+	}
+	for _, p := range paths {
+		b, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(dst, filepath.Base(p)), b, 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func writeJSONLFile[T any](path string, items []T) error {

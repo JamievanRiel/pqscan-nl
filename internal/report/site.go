@@ -2,6 +2,7 @@ package report
 
 import (
 	"bytes"
+	"compress/gzip"
 	"embed"
 	"encoding/json"
 	"errors"
@@ -105,7 +106,10 @@ func BuildSite(outDir string, summaries []results.Summary, latest []results.Reco
 			return err
 		}
 	}
-	return writeDomainIndex(filepath.Join(outDir, "domains.json"), data.Latest.Date, latest)
+	if err := writeDomainIndex(filepath.Join(outDir, "domains.json"), data.Latest.Date, latest); err != nil {
+		return err
+	}
+	return writeRawData(filepath.Join(outDir, "scan-"+data.Latest.Date+".jsonl.gz"), latest)
 }
 
 func newPageData(summaries []results.Summary) pageData {
@@ -172,6 +176,20 @@ func writeDomainIndex(path, date string, recs []results.Record) error {
 		return err
 	}
 	return os.WriteFile(path, b, 0o644)
+}
+
+// writeRawData writes the records as gzipped JSONL, the same format as the
+// scan output.
+func writeRawData(path string, recs []results.Record) error {
+	var buf bytes.Buffer
+	zw := gzip.NewWriter(&buf)
+	if err := results.WriteJSONL(zw, recs); err != nil {
+		return err
+	}
+	if err := zw.Close(); err != nil {
+		return err
+	}
+	return os.WriteFile(path, buf.Bytes(), 0o644)
 }
 
 func sectorName(s string) string {

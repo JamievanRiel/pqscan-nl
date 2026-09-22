@@ -69,10 +69,13 @@ func TestRunReport(t *testing.T) {
 	results.WriteJSONL(&buf, recs)
 	scan := filepath.Join(dir, "scan.jsonl")
 	writeFile(t, scan, buf.String())
+	banks := "domain,name,source\ning.nl,ING,https://x\n"
+	writeFile(t, filepath.Join(dir, "sectors", "banks.csv"), banks)
+	writeFile(t, filepath.Join(dir, "sectors", "README"), "not a list")
 
 	var stdout, stderr bytes.Buffer
 	err := run(context.Background(), []string{"report", "-scan", scan, "-tranco-id", " 64X5X\n",
-		"-summaries", filepath.Join(dir, "summaries"), "-site", filepath.Join(dir, "site")}, &stdout, &stderr)
+		"-summaries", filepath.Join(dir, "summaries"), "-sectors", filepath.Join(dir, "sectors"), "-site", filepath.Join(dir, "site")}, &stdout, &stderr)
 	if err != nil {
 		t.Fatalf("run: %v (stderr: %s)", err, stderr.String())
 	}
@@ -85,6 +88,12 @@ func TestRunReport(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(dir, "site", "index.html")); err != nil {
 		t.Error(err)
+	}
+	if b, err := os.ReadFile(filepath.Join(dir, "site", "sectors", "banks.csv")); err != nil || string(b) != banks {
+		t.Errorf("published banks.csv = %q, err %v", b, err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "site", "sectors", "README")); err == nil {
+		t.Error("only CSV files belong in site/sectors")
 	}
 }
 

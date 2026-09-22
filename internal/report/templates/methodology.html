@@ -27,9 +27,9 @@
 <p>The sector comparison uses curated lists, with a source for every entry:</p>
 <ul>
   <li><strong>Government:</strong> ministries, provinces, municipalities, water boards, agencies, independent administrative bodies, inspectorates, High Councils of State, the judiciary and the police, taken from the <a href="https://organisaties.overheid.nl/">Organisaties overheid</a> register, plus a few national services that the register lists as part of a ministry, such as the Belastingdienst.</li>
-  <li><strong>Banks, hospitals and web shops:</strong> compiled from public lists. The sources are in the CSV files in the repository.</li>
+  <li><strong>Banks, hospitals and web shops:</strong> compiled from public lists.</li>
 </ul>
-<p>A domain can be in the Tranco list and in a sector list at the same time.</p>
+<p>The lists, with the source of every entry, can be downloaded as CSV: <a href="sectors/government.csv">government</a>, <a href="sectors/banks.csv">banks</a>, <a href="sectors/hospitals.csv">hospitals</a> and <a href="sectors/webshops.csv">web shops</a>. A domain can be in the Tranco list and in a sector list at the same time.</p>
 
 <h2>Hosting networks</h2>
 <p>Each server's IP address is mapped to its network (autonomous system) with the public-domain <a href="https://iptoasn.com/">iptoasn.com</a> table.</p>
@@ -45,8 +45,8 @@
 </ul>
 
 <h2>Opting out</h2>
-<p>To exclude a domain from future scans, open an issue on <a href="https://github.com/JamievanRiel/pqscan-nl/issues">GitHub</a>. The domain will be added to the exclusion list.</p>
+<p>To exclude a domain from future scans, <a href="https://github.com/JamievanRiel/pqscan-nl-optout/issues/new?template=opt-out.yml">open an opt-out request</a> on GitHub. The domain will be added to the exclusion list.</p>
 
 <h2>Data</h2>
-<p>The raw results of every scan are attached to a <a href="https://github.com/JamievanRiel/pqscan-nl/releases">GitHub release</a>, one JSON record per domain. Per-scan summaries are in <code>data/summaries</code> in the repository.</p>
+<p>The <a href="scan-{{.Latest.Date}}.jsonl.gz">raw results of the latest scan</a> hold one JSON record per domain, gzipped. The <a href="search.html">search page</a> shows the status of a single domain.</p>
 {{end}}
