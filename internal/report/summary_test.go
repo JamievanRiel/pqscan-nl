@@ -19,17 +19,20 @@ func fixtureRecords() []results.Record {
 		{Domain: "bank.nl", Host: "bank.nl", Sectors: []string{"banks"}, Status: results.StatusPQDefault, ASN: 13335, ASOrg: "CLOUDFLARENET", ScannedAt: at(6)},
 		{Domain: "gemeente.nl", Sectors: []string{"government"}, Status: results.StatusUnreachable, Error: "dns", ScannedAt: at(7)},
 		{Domain: "f.nl", Host: "f.nl", TrancoRank: 6, Status: results.StatusClassic, ASN: 1136, ASOrg: "KPN", ScannedAt: at(8)},
+		{Domain: "g.nl", Host: "g.nl", TrancoRank: 400000, Status: results.StatusPQDefault, ASN: 13335, ASOrg: "CLOUDFLARENET", ScannedAt: at(5)},
 	}
 }
 
 func TestSummarize(t *testing.T) {
 	got := Summarize(fixtureRecords(), "64X5X", 2)
 	want := results.Summary{
-		Date:         "2026-09-28",
-		TrancoListID: "64X5X",
-		StartedAt:    time.Date(2026, 9, 28, 2, 1, 0, 0, time.UTC),
-		FinishedAt:   time.Date(2026, 9, 28, 2, 8, 0, 0, time.UTC),
-		Tranco:       results.Counts{Total: 6, PQDefault: 2, PQSupported: 1, Classic: 2, Unreachable: 1},
+		Date:          "2026-09-28",
+		TrancoListID:  "64X5X",
+		StartedAt:     time.Date(2026, 9, 28, 2, 1, 0, 0, time.UTC),
+		FinishedAt:    time.Date(2026, 9, 28, 2, 8, 0, 0, time.UTC),
+		Tranco:        results.Counts{Total: 7, PQDefault: 3, PQSupported: 1, Classic: 2, Unreachable: 1},
+		TrancoTopRank: 250000,
+		TrancoTop:     results.Counts{Total: 6, PQDefault: 2, PQSupported: 1, Classic: 2, Unreachable: 1},
 		Sectors: map[string]results.Counts{
 			"banks":      {Total: 2, PQDefault: 1, Classic: 1},
 			"government": {Total: 1, Unreachable: 1},

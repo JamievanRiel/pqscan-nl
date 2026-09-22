@@ -96,7 +96,9 @@ type Summary struct {
 	TrancoListID       string            `json:"tranco_list_id"`
 	StartedAt          time.Time         `json:"started_at"`
 	FinishedAt         time.Time         `json:"finished_at"`
-	Tranco             Counts            `json:"tranco"`
+	Tranco             Counts            `json:"tranco"`          // every Tranco domain
+	TrancoTopRank      int               `json:"tranco_top_rank"` // rank limit of TrancoTop
+	TrancoTop          Counts            `json:"tranco_top"`      // Tranco domains ranked TrancoTopRank or better
 	Sectors            map[string]Counts `json:"sectors"`
 	Providers          []ProviderCounts  `json:"providers"`
 	UnreachableByError map[string]int    `json:"unreachable_by_error"`

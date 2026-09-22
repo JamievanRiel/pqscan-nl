@@ -33,6 +33,7 @@ type pageData struct {
 	Title     string
 	Page      string
 	Latest    results.Summary
+	Tail      results.Counts // Tranco domains ranked below Latest.TrancoTopRank
 	Headline  float64
 	Trend     template.HTML
 	Sectors   template.HTML
@@ -114,15 +115,23 @@ func BuildSite(outDir string, summaries []results.Summary, latest []results.Reco
 
 func newPageData(summaries []results.Summary) pageData {
 	latest := summaries[len(summaries)-1]
-	d := pageData{Latest: latest, Headline: latest.Tranco.Pct(latest.Tranco.PQDefault)}
+	d := pageData{
+		Latest:   latest,
+		Tail:     minus(latest.Tranco, latest.TrancoTop),
+		Headline: latest.TrancoTop.Pct(latest.TrancoTop.PQDefault),
+	}
 
 	trend := make([]TrendPoint, len(summaries))
 	for i, s := range summaries {
-		trend[i] = TrendPoint{Date: s.Date, Pct: s.Tranco.Pct(s.Tranco.PQDefault)}
+		trend[i] = TrendPoint{Date: s.Date, Pct: s.TrancoTop.Pct(s.TrancoTop.PQDefault)}
 	}
 	d.Trend = TrendSVG(trend)
 
-	rows := []BarRow{{Label: "Top .nl sites", Counts: latest.Tranco}}
+	top := strconv.Itoa(latest.TrancoTopRank/1000) + "k"
+	rows := []BarRow{
+		{Label: "Tranco top " + top, Counts: latest.TrancoTop},
+		{Label: "Tranco " + top + "–1M", Counts: d.Tail},
+	}
 	for _, name := range slices.Sorted(maps.Keys(latest.Sectors)) {
 		rows = append(rows, BarRow{Label: sectorName(name), Counts: latest.Sectors[name]})
 	}
@@ -133,6 +142,17 @@ func newPageData(summaries []results.Summary) pageData {
 	}
 	d.Causes = describeCauses(latest.UnreachableByError)
 	return d
+}
+
+// minus subtracts b from a per status.
+func minus(a, b results.Counts) results.Counts {
+	return results.Counts{
+		Total:       a.Total - b.Total,
+		PQDefault:   a.PQDefault - b.PQDefault,
+		PQSupported: a.PQSupported - b.PQSupported,
+		Classic:     a.Classic - b.Classic,
+		Unreachable: a.Unreachable - b.Unreachable,
+	}
 }
 
 // describeCauses lists unreachable causes alphabetically: "DNS failure 1, timeout 1".

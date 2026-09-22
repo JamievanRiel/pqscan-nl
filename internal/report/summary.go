@@ -14,12 +14,19 @@ import (
 	"github.com/JamievanRiel/pqscan-nl/internal/results"
 )
 
-// Summarize aggregates one scan. The headline counts and the providers use
-// Tranco domains only; sector counts and unreachable causes use every record.
-// Providers are the topN networks by number of reachable Tranco domains.
+// TopRank is the Tranco rank limit for the headline. Lower in the list, the
+// .nl domains include large groups of similar, generated names on one network,
+// which would turn the headline into a measure of that network.
+const TopRank = 250_000
+
+// Summarize aggregates one scan. The headline counts (TrancoTop) and the
+// providers use Tranco domains ranked TopRank or better, Tranco counts every
+// Tranco domain, and sector counts and unreachable causes use every record.
+// Providers are the topN networks by number of reachable TrancoTop domains.
 func Summarize(recs []results.Record, trancoListID string, topN int) results.Summary {
 	s := results.Summary{
 		TrancoListID:       trancoListID,
+		TrancoTopRank:      TopRank,
 		Sectors:            map[string]results.Counts{},
 		Providers:          []results.ProviderCounts{},
 		UnreachableByError: map[string]int{},
@@ -34,6 +41,9 @@ func Summarize(recs []results.Record, trancoListID string, topN int) results.Sum
 		}
 		if r.TrancoRank > 0 {
 			s.Tranco.Add(r.Status)
+		}
+		if r.TrancoRank > 0 && r.TrancoRank <= TopRank {
+			s.TrancoTop.Add(r.Status)
 			if r.Status != results.StatusUnreachable && r.ASN != 0 {
 				pc := providers[r.ASN]
 				if pc == nil {

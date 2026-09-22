@@ -23,7 +23,8 @@
 </div>
 
 <h2 id="sectors">Which domains</h2>
-<p>The main figure covers every <code>.nl</code> domain in the <a href="https://tranco-list.eu/">Tranco top 1 million</a>, a ranking of popular domains built for research. Each scan records the Tranco list ID, so its input can be reproduced.</p>
+<p>The main figure, the trend and the hosting table cover the <code>.nl</code> domains ranked in the top {{num .Latest.TrancoTopRank}} of the <a href="https://tranco-list.eu/">Tranco list</a>, a ranking of popular domains built for research. Each scan records the Tranco list ID, so its input can be reproduced.</p>
+<p>The rest of the Tranco top 1 million is scanned as well and shown as a separate bar. Below rank {{num .Latest.TrancoTopRank}}, the <code>.nl</code> domains include thousands of similar, apparently generated names, most of them hosted on one network. In the latest scan that part held {{num .Tail.Reachable}} reachable domains, {{pct (.Tail.Pct .Tail.PQDefault)}}% of them post-quantum by default. Counting them in the main figure would make it mostly a measure of that network.</p>
 <p>The sector comparison uses curated lists, with a source for every entry:</p>
 <ul>
   <li><strong>Government:</strong> ministries, provinces, municipalities, water boards, agencies, independent administrative bodies, inspectorates, High Councils of State, the judiciary and the police, taken from the <a href="https://organisaties.overheid.nl/">Organisaties overheid</a> register, plus a few national services that the register lists as part of a ministry, such as the Belastingdienst.</li>

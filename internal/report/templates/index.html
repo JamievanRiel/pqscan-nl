@@ -2,7 +2,7 @@
 <section class="hero">
   <p class="eyebrow">Weekly scan · {{.Latest.Date}}</p>
   <h1><span class="big">{{pct .Headline}}%</span> of the top .nl websites protect visitors with post-quantum key exchange</h1>
-  <p class="lead">Of the {{num .Latest.Tranco.Reachable}} reachable .nl domains in the <a href="https://tranco-list.eu/">Tranco top 1 million</a>, {{num .Latest.Tranco.PQDefault}} use a hybrid post-quantum key exchange with a current browser. Another {{num .Latest.Tranco.PQSupported}} support it but do not choose it by default.</p>
+  <p class="lead">Of the {{num .Latest.TrancoTop.Reachable}} reachable .nl domains in the <a href="https://tranco-list.eu/">Tranco top {{num .Latest.TrancoTopRank}}</a>, {{num .Latest.TrancoTop.PQDefault}} use a hybrid post-quantum key exchange with a current browser. Another {{num .Latest.TrancoTop.PQSupported}} support it but do not choose it by default. The rest of the top 1 million is shown separately, see the <a href="methodology.html#sectors">methodology</a>.</p>
 </section>
 
 <section>
@@ -39,7 +39,7 @@
 
 <section>
   <h2>Not reachable</h2>
-  <p>{{num .Latest.Tranco.Unreachable}} top .nl domains did not complete a TLS handshake on port 443, on the domain or its www host. They are left out of every percentage.</p>
+  <p>{{num .Latest.TrancoTop.Unreachable}} top .nl domains did not complete a TLS handshake on port 443, on the domain or its www host. They are left out of every percentage.</p>
   {{- with .Causes}}
   <p class="note">By cause, across all scanned domains: {{.}}.</p>
   {{- end}}

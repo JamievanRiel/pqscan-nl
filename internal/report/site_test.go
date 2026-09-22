@@ -28,7 +28,7 @@ func TestBuildSite(t *testing.T) {
 	latest := Summarize(recs, "64X5X", 20)
 	earlier := latest
 	earlier.Date = "2026-09-21"
-	earlier.Tranco = results.Counts{Total: 6, PQDefault: 1, PQSupported: 1, Classic: 3, Unreachable: 1}
+	earlier.TrancoTop = results.Counts{Total: 6, PQDefault: 1, PQSupported: 1, Classic: 3, Unreachable: 1}
 
 	out := t.TempDir()
 	if err := BuildSite(out, []results.Summary{earlier, latest}, recs); err != nil {
@@ -44,7 +44,7 @@ func TestBuildSite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"40.0%", "<polyline", "Banks", "Government", "KPN", `aria-current="page"`} {
+	for _, want := range []string{"40.0%", "<polyline", "Banks", "Government", "KPN", `aria-current="page"`, "Tranco top 250k", "Tranco 250k–1M", "250,000"} {
 		if !bytes.Contains(index, []byte(want)) {
 			t.Errorf("index.html lacks %q", want)
 		}
