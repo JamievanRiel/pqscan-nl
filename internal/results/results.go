@@ -90,15 +90,26 @@ type ProviderCounts struct {
 	Counts
 }
 
+// RankCounts are the counts for the Tranco ranks From to To.
+type RankCounts struct {
+	From int `json:"from"`
+	To   int `json:"to"`
+	Counts
+}
+
 // Summary aggregates one scan.
 type Summary struct {
 	Date               string            `json:"date"`
 	TrancoListID       string            `json:"tranco_list_id"`
+	Revision           string            `json:"revision,omitempty"` // commit of the pqscan build
 	StartedAt          time.Time         `json:"started_at"`
 	FinishedAt         time.Time         `json:"finished_at"`
 	Tranco             Counts            `json:"tranco"`          // every Tranco domain
 	TrancoTopRank      int               `json:"tranco_top_rank"` // rank limit of TrancoTop
 	TrancoTop          Counts            `json:"tranco_top"`      // Tranco domains ranked TrancoTopRank or better
+	ByRank             []RankCounts      `json:"by_rank"`
+	Groups             map[string]int    `json:"groups"`       // reachable TrancoTop domains per negotiated group
+	TLSVersions        map[string]int    `json:"tls_versions"` // reachable TrancoTop domains per TLS version
 	Sectors            map[string]Counts `json:"sectors"`
 	Providers          []ProviderCounts  `json:"providers"`
 	UnreachableByError map[string]int    `json:"unreachable_by_error"`

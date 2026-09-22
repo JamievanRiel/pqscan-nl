@@ -19,17 +19,27 @@ import (
 // which would turn the headline into a measure of that network.
 const TopRank = 250_000
 
-// Summarize aggregates one scan. The headline counts (TrancoTop) and the
-// providers use Tranco domains ranked TopRank or better, Tranco counts every
-// Tranco domain, and sector counts and unreachable causes use every record.
-// Providers are the topN networks by number of reachable TrancoTop domains.
+// RankBands are the Tranco rank bands of Summary.ByRank. The last band lies
+// below TopRank and is shown for comparison.
+var RankBands = [][2]int{{1, 10_000}, {10_001, 50_000}, {50_001, 100_000}, {100_001, TopRank}, {TopRank + 1, 1_000_000}}
+
+// Summarize aggregates one scan. The headline counts (TrancoTop), the groups,
+// the TLS versions and the providers use Tranco domains ranked TopRank or
+// better; Tranco and ByRank count every Tranco domain; sector counts and
+// unreachable causes use every record. Providers are the topN networks by
+// number of reachable TrancoTop domains.
 func Summarize(recs []results.Record, trancoListID string, topN int) results.Summary {
 	s := results.Summary{
 		TrancoListID:       trancoListID,
 		TrancoTopRank:      TopRank,
+		Groups:             map[string]int{},
+		TLSVersions:        map[string]int{},
 		Sectors:            map[string]results.Counts{},
 		Providers:          []results.ProviderCounts{},
 		UnreachableByError: map[string]int{},
+	}
+	for _, b := range RankBands {
+		s.ByRank = append(s.ByRank, results.RankCounts{From: b[0], To: b[1]})
 	}
 	providers := map[uint32]*results.ProviderCounts{}
 	for i, r := range recs {
@@ -42,15 +52,28 @@ func Summarize(recs []results.Record, trancoListID string, topN int) results.Sum
 		if r.TrancoRank > 0 {
 			s.Tranco.Add(r.Status)
 		}
+		for j := range s.ByRank {
+			if b := &s.ByRank[j]; r.TrancoRank >= b.From && r.TrancoRank <= b.To {
+				b.Add(r.Status)
+			}
+		}
 		if r.TrancoRank > 0 && r.TrancoRank <= TopRank {
 			s.TrancoTop.Add(r.Status)
-			if r.Status != results.StatusUnreachable && r.ASN != 0 {
-				pc := providers[r.ASN]
-				if pc == nil {
-					pc = &results.ProviderCounts{ASN: r.ASN, Org: r.ASOrg}
-					providers[r.ASN] = pc
+			if r.Status != results.StatusUnreachable {
+				if r.Group != "" {
+					s.Groups[r.Group]++
 				}
-				pc.Add(r.Status)
+				if r.TLSVersion != "" {
+					s.TLSVersions[r.TLSVersion]++
+				}
+				if r.ASN != 0 {
+					pc := providers[r.ASN]
+					if pc == nil {
+						pc = &results.ProviderCounts{ASN: r.ASN, Org: r.ASOrg}
+						providers[r.ASN] = pc
+					}
+					pc.Add(r.Status)
+				}
 			}
 		}
 		for _, sector := range r.Sectors {

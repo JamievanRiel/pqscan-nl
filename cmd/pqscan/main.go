@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -173,6 +174,9 @@ func runReport(args []string, stdout, stderr io.Writer) error {
 		return fmt.Errorf("%s: no records", *scan)
 	}
 	s := report.Summarize(recs, id, *top)
+	if info, ok := debug.ReadBuildInfo(); ok {
+		s.Revision = buildRevision(info.Settings)
+	}
 	path, err := report.WriteSummary(*summaries, s)
 	if err != nil {
 		return err
@@ -213,6 +217,26 @@ func describe(r results.Record) string {
 		s += ", supports " + r.PQGroup
 	}
 	return s
+}
+
+// buildRevision returns the VCS revision in build settings, with "-dirty"
+// when the tree had uncommitted changes, or "" without VCS information
+// (go run and go test do not record it).
+func buildRevision(settings []debug.BuildSetting) string {
+	var rev string
+	var dirty bool
+	for _, s := range settings {
+		switch s.Key {
+		case "vcs.revision":
+			rev = s.Value
+		case "vcs.modified":
+			dirty = s.Value == "true"
+		}
+	}
+	if rev != "" && dirty {
+		rev += "-dirty"
+	}
+	return rev
 }
 
 // copyCSVFiles copies the .csv files in src to dst.

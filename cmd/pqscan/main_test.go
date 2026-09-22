@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime/debug"
 	"strings"
 	"testing"
 	"time"
@@ -133,5 +134,21 @@ func TestUnknownCommand(t *testing.T) {
 	}
 	if !strings.Contains(stderr.String(), "Usage:") {
 		t.Error("usage must be printed")
+	}
+}
+
+func TestBuildRevision(t *testing.T) {
+	for _, tc := range []struct {
+		settings []debug.BuildSetting
+		want     string
+	}{
+		{nil, ""},
+		{[]debug.BuildSetting{{Key: "vcs.revision", Value: "abc123"}, {Key: "vcs.modified", Value: "false"}}, "abc123"},
+		{[]debug.BuildSetting{{Key: "vcs.modified", Value: "true"}, {Key: "vcs.revision", Value: "abc123"}}, "abc123-dirty"},
+		{[]debug.BuildSetting{{Key: "vcs.modified", Value: "true"}}, ""},
+	} {
+		if got := buildRevision(tc.settings); got != tc.want {
+			t.Errorf("buildRevision(%v) = %q, want %q", tc.settings, got, tc.want)
+		}
 	}
 }
