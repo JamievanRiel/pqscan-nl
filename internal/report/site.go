@@ -75,7 +75,7 @@ var causeNames = map[string]string{
 }
 
 var funcs = template.FuncMap{
-	"pct": func(f float64) string { return strconv.FormatFloat(f, 'f', 1, 64) },
+	"pct": pct1,
 	"num": thousands,
 }
 
