@@ -1,14 +1,14 @@
 {
   "date": "2026-09-22",
   "tranco_list_id": "8P4GV",
-  "started_at": "2026-09-22T06:34:51.678453059Z",
-  "finished_at": "2026-09-22T06:38:53.806554971Z",
+  "started_at": "2026-09-22T06:44:55.201654083Z",
+  "finished_at": "2026-09-22T06:49:17.604218707Z",
   "tranco": {
     "total": 19049,
     "pq_default": 13310,
-    "pq_supported": 5,
-    "classic": 5140,
-    "unreachable": 594
+    "pq_supported": 7,
+    "classic": 5137,
+    "unreachable": 595
   },
   "sectors": {
     "banks": {
@@ -22,8 +22,8 @@
       "total": 524,
       "pq_default": 79,
       "pq_supported": 0,
-      "classic": 443,
-      "unreachable": 2
+      "classic": 442,
+      "unreachable": 3
     },
     "hospitals": {
       "total": 69,
@@ -53,35 +53,35 @@
     {
       "asn": 16509,
       "org": "AMAZON-02",
-      "total": 656,
+      "total": 660,
       "pq_default": 291,
-      "pq_supported": 0,
-      "classic": 365,
+      "pq_supported": 1,
+      "classic": 368,
       "unreachable": 0
     },
     {
       "asn": 20857,
       "org": "TRANSIP-AS Amsterdam, the Netherlands",
-      "total": 639,
+      "total": 641,
       "pq_default": 45,
       "pq_supported": 0,
-      "classic": 594,
+      "classic": 596,
       "unreachable": 0
     },
     {
       "asn": 8075,
       "org": "MICROSOFT-CORP-MSN-AS-BLOCK",
       "total": 393,
-      "pq_default": 25,
-      "pq_supported": 1,
-      "classic": 367,
+      "pq_default": 26,
+      "pq_supported": 2,
+      "classic": 365,
       "unreachable": 0
     },
     {
       "asn": 24940,
       "org": "HETZNER-AS",
-      "total": 353,
-      "pq_default": 100,
+      "total": 352,
+      "pq_default": 99,
       "pq_supported": 1,
       "classic": 252,
       "unreachable": 0
@@ -116,10 +116,10 @@
     {
       "asn": 60781,
       "org": "LEASEWEB-NL-AMS-01 Netherlands",
-      "total": 210,
+      "total": 213,
       "pq_default": 15,
       "pq_supported": 0,
-      "classic": 195,
+      "classic": 198,
       "unreachable": 0
     },
     {
@@ -135,8 +135,8 @@
       "asn": 396982,
       "org": "GOOGLE-CLOUD-PLATFORM",
       "total": 174,
-      "pq_default": 16,
-      "pq_supported": 1,
+      "pq_default": 17,
+      "pq_supported": 0,
       "classic": 157,
       "unreachable": 0
     },
@@ -177,15 +177,6 @@
       "unreachable": 0
     },
     {
-      "asn": 25459,
-      "org": "NEDZONE-AS",
-      "total": 93,
-      "pq_default": 5,
-      "pq_supported": 0,
-      "classic": 88,
-      "unreachable": 0
-    },
-    {
       "asn": 31477,
       "org": "DUOCAST-AS",
       "total": 93,
@@ -195,12 +186,21 @@
       "unreachable": 0
     },
     {
+      "asn": 25459,
+      "org": "NEDZONE-AS",
+      "total": 92,
+      "pq_default": 5,
+      "pq_supported": 0,
+      "classic": 87,
+      "unreachable": 0
+    },
+    {
       "asn": 1103,
       "org": "SURFNET-NL SURFnet, The Netherlands",
-      "total": 80,
+      "total": 82,
       "pq_default": 7,
       "pq_supported": 0,
-      "classic": 73,
+      "classic": 75,
       "unreachable": 0
     },
     {
@@ -223,9 +223,9 @@
     }
   ],
   "unreachable_by_error": {
-    "dns": 305,
-    "refused": 50,
-    "timeout": 208,
-    "tls": 31
+    "dns": 306,
+    "refused": 48,
+    "timeout": 213,
+    "tls": 28
   }
 }
