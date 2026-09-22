@@ -28,6 +28,8 @@ For each domain, `pqscan` connects to port 443 (the domain, or its `www.` host i
 
 The headline percentage, the trend and the hosting table cover the `.nl` domains in the Tranco top 250,000. The rest of the top 1 million is scanned too but shown separately: it contains thousands of similar, apparently generated domains on one network, which would otherwise dominate the figure.
 
+The report gives every percentage with a 95% Wilson interval, breaks adoption down by Tranco rank, sector, hosting network, key exchange group and TLS version, and generates its key findings from the latest scan.
+
 Only handshakes are performed; no web pages are requested. See the [methodology](https://jamievanriel.github.io/pqscan-nl/methodology.html) for the limitations.
 
 ## How it works
@@ -70,7 +72,7 @@ python3 -m http.server -d site
 ## Data
 
 - **Raw results:** one JSON record per domain, attached to each [release](https://github.com/JamievanRiel/pqscan-nl/releases). The latest scan is also published on the site as `scan-YYYY-MM-DD.jsonl.gz`, linked from every page. `cert_valid` is `true` or `false` when a handshake completed (whether the certificate verifies against the system roots, which does not affect the status) and absent for unreachable domains.
-- **Summaries:** counts per status, sector and hosting network in [`data/summaries`](data/summaries). `tranco_top` holds the headline counts for the domains ranked `tranco_top_rank` or better, `tranco` counts every Tranco domain.
+- **Summaries:** counts per status, rank band, key exchange group, TLS version, sector and hosting network in [`data/summaries`](data/summaries), also published on the site under `summaries/`. `tranco_top` holds the headline counts for the domains ranked `tranco_top_rank` or better, `tranco` counts every Tranco domain, and `revision` is the commit of the pqscan build that produced the summary.
 - **Sector lists:** [`lists/sectors`](lists/sectors), every entry with its source, published on the site under `sectors/`. The government list is generated from the [Organisaties overheid](https://organisaties.overheid.nl/) register with `go run ./tools/govlist`, which also merges the hand-maintained entries in [`lists/government-extra.csv`](lists/government-extra.csv).
 
 ## Opting out
