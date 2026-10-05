@@ -1,0 +1,297 @@
+{
+  "date": "2026-10-05",
+  "tranco_list_id": "647LX",
+  "revision": "ade721fb4651d9fd61a1cd9c74b5372743de5cd4",
+  "started_at": "2026-10-05T08:17:34.63567334Z",
+  "finished_at": "2026-10-05T08:22:17.274356265Z",
+  "tranco": {
+    "total": 17825,
+    "pq_default": 11982,
+    "pq_supported": 7,
+    "classic": 5166,
+    "unreachable": 670
+  },
+  "tranco_top_rank": 250000,
+  "tranco_top": {
+    "total": 1974,
+    "pq_default": 811,
+    "pq_supported": 1,
+    "classic": 1034,
+    "unreachable": 128
+  },
+  "by_rank": [
+    {
+      "from": 1,
+      "to": 10000,
+      "total": 44,
+      "pq_default": 20,
+      "pq_supported": 0,
+      "classic": 23,
+      "unreachable": 1
+    },
+    {
+      "from": 10001,
+      "to": 50000,
+      "total": 263,
+      "pq_default": 123,
+      "pq_supported": 0,
+      "classic": 127,
+      "unreachable": 13
+    },
+    {
+      "from": 50001,
+      "to": 100000,
+      "total": 368,
+      "pq_default": 166,
+      "pq_supported": 0,
+      "classic": 184,
+      "unreachable": 18
+    },
+    {
+      "from": 100001,
+      "to": 250000,
+      "total": 1299,
+      "pq_default": 502,
+      "pq_supported": 1,
+      "classic": 700,
+      "unreachable": 96
+    },
+    {
+      "from": 250001,
+      "to": 1000000,
+      "total": 15851,
+      "pq_default": 11171,
+      "pq_supported": 6,
+      "classic": 4132,
+      "unreachable": 542
+    }
+  ],
+  "groups": {
+    "CurveP256": 117,
+    "CurveP384": 66,
+    "X25519": 852,
+    "X25519MLKEM768": 811
+  },
+  "tls_versions": {
+    "1.2": 173,
+    "1.3": 1673
+  },
+  "sectors": {
+    "banks": {
+      "total": 27,
+      "pq_default": 19,
+      "pq_supported": 0,
+      "classic": 8,
+      "unreachable": 0
+    },
+    "government": {
+      "total": 524,
+      "pq_default": 86,
+      "pq_supported": 0,
+      "classic": 436,
+      "unreachable": 2
+    },
+    "hospitals": {
+      "total": 69,
+      "pq_default": 13,
+      "pq_supported": 0,
+      "classic": 54,
+      "unreachable": 2
+    },
+    "webshops": {
+      "total": 32,
+      "pq_default": 22,
+      "pq_supported": 0,
+      "classic": 10,
+      "unreachable": 0
+    }
+  },
+  "providers": [
+    {
+      "asn": 13335,
+      "org": "CLOUDFLARENET",
+      "total": 430,
+      "pq_default": 416,
+      "pq_supported": 0,
+      "classic": 14,
+      "unreachable": 0
+    },
+    {
+      "asn": 16509,
+      "org": "AMAZON-02",
+      "total": 193,
+      "pq_default": 88,
+      "pq_supported": 0,
+      "classic": 105,
+      "unreachable": 0
+    },
+    {
+      "asn": 8075,
+      "org": "MICROSOFT-CORP-MSN-AS-BLOCK",
+      "total": 105,
+      "pq_default": 19,
+      "pq_supported": 0,
+      "classic": 86,
+      "unreachable": 0
+    },
+    {
+      "asn": 20857,
+      "org": "TRANSIP-AS Amsterdam, the Netherlands",
+      "total": 87,
+      "pq_default": 5,
+      "pq_supported": 0,
+      "classic": 82,
+      "unreachable": 0
+    },
+    {
+      "asn": 20940,
+      "org": "AKAMAI-ASN1",
+      "total": 67,
+      "pq_default": 66,
+      "pq_supported": 0,
+      "classic": 1,
+      "unreachable": 0
+    },
+    {
+      "asn": 24940,
+      "org": "HETZNER-AS",
+      "total": 67,
+      "pq_default": 26,
+      "pq_supported": 0,
+      "classic": 41,
+      "unreachable": 0
+    },
+    {
+      "asn": 60781,
+      "org": "LEASEWEB-NL-AMS-01 Netherlands",
+      "total": 49,
+      "pq_default": 4,
+      "pq_supported": 0,
+      "classic": 45,
+      "unreachable": 0
+    },
+    {
+      "asn": 396982,
+      "org": "GOOGLE-CLOUD-PLATFORM",
+      "total": 46,
+      "pq_default": 7,
+      "pq_supported": 0,
+      "classic": 39,
+      "unreachable": 0
+    },
+    {
+      "asn": 12859,
+      "org": "NL-BIT BIT BV",
+      "total": 40,
+      "pq_default": 5,
+      "pq_supported": 0,
+      "classic": 35,
+      "unreachable": 0
+    },
+    {
+      "asn": 1103,
+      "org": "SURFNET-NL SURFnet, The Netherlands",
+      "total": 37,
+      "pq_default": 2,
+      "pq_supported": 0,
+      "classic": 35,
+      "unreachable": 0
+    },
+    {
+      "asn": 34762,
+      "org": "COMBELL-AS",
+      "total": 32,
+      "pq_default": 10,
+      "pq_supported": 0,
+      "classic": 22,
+      "unreachable": 0
+    },
+    {
+      "asn": 48635,
+      "org": "CLDIN-NL Your Hosting B.V. part of Your.Online",
+      "total": 31,
+      "pq_default": 4,
+      "pq_supported": 0,
+      "classic": 27,
+      "unreachable": 0
+    },
+    {
+      "asn": 41887,
+      "org": "PROLOCATION Prolocation",
+      "total": 26,
+      "pq_default": 2,
+      "pq_supported": 0,
+      "classic": 24,
+      "unreachable": 0
+    },
+    {
+      "asn": 15703,
+      "org": "TRUESERVER-AS TrueServer BV AS number",
+      "total": 25,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 25,
+      "unreachable": 0
+    },
+    {
+      "asn": 54113,
+      "org": "FASTLY",
+      "total": 24,
+      "pq_default": 23,
+      "pq_supported": 0,
+      "classic": 1,
+      "unreachable": 0
+    },
+    {
+      "asn": 20847,
+      "org": "PREVIDER-AS",
+      "total": 23,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 23,
+      "unreachable": 0
+    },
+    {
+      "asn": 14061,
+      "org": "DIGITALOCEAN-ASN",
+      "total": 20,
+      "pq_default": 3,
+      "pq_supported": 0,
+      "classic": 17,
+      "unreachable": 0
+    },
+    {
+      "asn": 16276,
+      "org": "OVH",
+      "total": 20,
+      "pq_default": 4,
+      "pq_supported": 0,
+      "classic": 16,
+      "unreachable": 0
+    },
+    {
+      "asn": 29550,
+      "org": "SIMPLYTRANSIT",
+      "total": 17,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 17,
+      "unreachable": 0
+    },
+    {
+      "asn": 31477,
+      "org": "DUOCAST-AS",
+      "total": 16,
+      "pq_default": 5,
+      "pq_supported": 0,
+      "classic": 11,
+      "unreachable": 0
+    }
+  ],
+  "unreachable_by_error": {
+    "dns": 390,
+    "refused": 45,
+    "timeout": 208,
+    "tls": 27
+  }
+}
