@@ -1,0 +1,297 @@
+{
+  "date": "2026-11-09",
+  "tranco_list_id": "8P8NV",
+  "revision": "33395ed2b509537069d67308f10f45ff8a8cadb0",
+  "started_at": "2026-11-09T09:04:09.404686091Z",
+  "finished_at": "2026-11-09T09:07:46.894736236Z",
+  "tranco": {
+    "total": 17140,
+    "pq_default": 12065,
+    "pq_supported": 4,
+    "classic": 4230,
+    "unreachable": 841
+  },
+  "tranco_top_rank": 250000,
+  "tranco_top": {
+    "total": 1859,
+    "pq_default": 879,
+    "pq_supported": 1,
+    "classic": 857,
+    "unreachable": 122
+  },
+  "by_rank": [
+    {
+      "from": 1,
+      "to": 10000,
+      "total": 38,
+      "pq_default": 19,
+      "pq_supported": 0,
+      "classic": 18,
+      "unreachable": 1
+    },
+    {
+      "from": 10001,
+      "to": 50000,
+      "total": 255,
+      "pq_default": 131,
+      "pq_supported": 1,
+      "classic": 111,
+      "unreachable": 12
+    },
+    {
+      "from": 50001,
+      "to": 100000,
+      "total": 367,
+      "pq_default": 186,
+      "pq_supported": 0,
+      "classic": 158,
+      "unreachable": 23
+    },
+    {
+      "from": 100001,
+      "to": 250000,
+      "total": 1199,
+      "pq_default": 543,
+      "pq_supported": 0,
+      "classic": 570,
+      "unreachable": 86
+    },
+    {
+      "from": 250001,
+      "to": 1000000,
+      "total": 15281,
+      "pq_default": 11186,
+      "pq_supported": 3,
+      "classic": 3373,
+      "unreachable": 719
+    }
+  ],
+  "groups": {
+    "CurveP256": 94,
+    "CurveP384": 42,
+    "X25519": 722,
+    "X25519MLKEM768": 879
+  },
+  "tls_versions": {
+    "1.2": 142,
+    "1.3": 1595
+  },
+  "sectors": {
+    "banks": {
+      "total": 27,
+      "pq_default": 23,
+      "pq_supported": 0,
+      "classic": 4,
+      "unreachable": 0
+    },
+    "government": {
+      "total": 524,
+      "pq_default": 90,
+      "pq_supported": 0,
+      "classic": 433,
+      "unreachable": 1
+    },
+    "hospitals": {
+      "total": 69,
+      "pq_default": 28,
+      "pq_supported": 0,
+      "classic": 40,
+      "unreachable": 1
+    },
+    "webshops": {
+      "total": 32,
+      "pq_default": 24,
+      "pq_supported": 0,
+      "classic": 8,
+      "unreachable": 0
+    }
+  },
+  "providers": [
+    {
+      "asn": 13335,
+      "org": "CLOUDFLARENET - Cloudflare, Inc.",
+      "total": 444,
+      "pq_default": 433,
+      "pq_supported": 0,
+      "classic": 11,
+      "unreachable": 0
+    },
+    {
+      "asn": 16509,
+      "org": "AMAZON-02 - Amazon.com, Inc.",
+      "total": 182,
+      "pq_default": 84,
+      "pq_supported": 0,
+      "classic": 98,
+      "unreachable": 0
+    },
+    {
+      "asn": 8075,
+      "org": "MICROSOFT-CORP-MSN-AS-BLOCK - Microsoft Corporation",
+      "total": 108,
+      "pq_default": 45,
+      "pq_supported": 0,
+      "classic": 63,
+      "unreachable": 0
+    },
+    {
+      "asn": 20857,
+      "org": "TRANSIP-AS Signet B.V.",
+      "total": 73,
+      "pq_default": 4,
+      "pq_supported": 0,
+      "classic": 69,
+      "unreachable": 0
+    },
+    {
+      "asn": 20940,
+      "org": "AKAMAI-ASN1 Akamai International B.V.",
+      "total": 66,
+      "pq_default": 66,
+      "pq_supported": 0,
+      "classic": 0,
+      "unreachable": 0
+    },
+    {
+      "asn": 24940,
+      "org": "HETZNER-AS Hetzner Online GmbH",
+      "total": 51,
+      "pq_default": 19,
+      "pq_supported": 0,
+      "classic": 32,
+      "unreachable": 0
+    },
+    {
+      "asn": 396982,
+      "org": "GOOGLE-CLOUD-PLATFORM - Google LLC",
+      "total": 43,
+      "pq_default": 38,
+      "pq_supported": 0,
+      "classic": 5,
+      "unreachable": 0
+    },
+    {
+      "asn": 1103,
+      "org": "SURFNET-NL SURF B.V.",
+      "total": 42,
+      "pq_default": 2,
+      "pq_supported": 0,
+      "classic": 40,
+      "unreachable": 0
+    },
+    {
+      "asn": 60781,
+      "org": "LEASEWEB-NL-AMS-01 LeaseWeb Netherlands B.V.",
+      "total": 36,
+      "pq_default": 2,
+      "pq_supported": 0,
+      "classic": 34,
+      "unreachable": 0
+    },
+    {
+      "asn": 12859,
+      "org": "NL-BIT BIT BV",
+      "total": 33,
+      "pq_default": 3,
+      "pq_supported": 0,
+      "classic": 30,
+      "unreachable": 0
+    },
+    {
+      "asn": 34762,
+      "org": "COMBELL-AS Combell NV",
+      "total": 29,
+      "pq_default": 10,
+      "pq_supported": 0,
+      "classic": 19,
+      "unreachable": 0
+    },
+    {
+      "asn": 54113,
+      "org": "FASTLY - Fastly, Inc.",
+      "total": 29,
+      "pq_default": 28,
+      "pq_supported": 0,
+      "classic": 1,
+      "unreachable": 0
+    },
+    {
+      "asn": 41887,
+      "org": "PROLOCATION Prolocation B.V.",
+      "total": 28,
+      "pq_default": 2,
+      "pq_supported": 0,
+      "classic": 26,
+      "unreachable": 0
+    },
+    {
+      "asn": 48635,
+      "org": "CLDIN-NL Your Hosting B.V.",
+      "total": 27,
+      "pq_default": 8,
+      "pq_supported": 0,
+      "classic": 19,
+      "unreachable": 0
+    },
+    {
+      "asn": 15703,
+      "org": "TrueServer-AS TrueFullstaq B.V.",
+      "total": 26,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 26,
+      "unreachable": 0
+    },
+    {
+      "asn": 16276,
+      "org": "OVH OVH SAS",
+      "total": 21,
+      "pq_default": 4,
+      "pq_supported": 0,
+      "classic": 17,
+      "unreachable": 0
+    },
+    {
+      "asn": 20847,
+      "org": "PREVIDER-AS Previder B.V.",
+      "total": 19,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 19,
+      "unreachable": 0
+    },
+    {
+      "asn": 14061,
+      "org": "DIGITALOCEAN-ASN - DigitalOcean, LLC",
+      "total": 15,
+      "pq_default": 4,
+      "pq_supported": 0,
+      "classic": 11,
+      "unreachable": 0
+    },
+    {
+      "asn": 25182,
+      "org": "PUBLIEKE-OMROEP-AS Stichting Nederlandse Publieke Omroep",
+      "total": 14,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 14,
+      "unreachable": 0
+    },
+    {
+      "asn": 24586,
+      "org": "NL-INTERMAX Intermax Group B.V.",
+      "total": 13,
+      "pq_default": 0,
+      "pq_supported": 0,
+      "classic": 13,
+      "unreachable": 0
+    }
+  ],
+  "unreachable_by_error": {
+    "dns": 590,
+    "refused": 40,
+    "timeout": 181,
+    "tls": 30
+  }
+}
